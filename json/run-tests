@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+
+import glob
+import subprocess
+
+def run_tests():
+    for json_file in glob.glob("*.json"):
+        run_json_reprint_test(json_file)
+
+def run_json_reprint_test(json_file):
+    input_ = open(json_file).read()
+    (output, returncode) = run(["runghc", "json_reprint.hs"], input_)
+    if returncode == 0 and output == input_:
+        print "json_reprint %s: OK" % json_file
+    else:
+        print "json_reprint %s: FAIL, GOT:\n%s" % (json_file, indent(output))
+
+def run(command, input_):
+    process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    (output, err) = process.communicate(input_)
+    return (output, process.returncode)
+
+def indent(text):
+    return "\n".join("    " + x for x in text.split("\n"))
+
+if __name__ == "__main__":
+    run_tests()
