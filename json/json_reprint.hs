@@ -1,48 +1,42 @@
 main = interact reprint
-    where reprint = printJDoc . parseJDoc
+    where reprint = printJValue . parseDocument
 
+-- DATA
 
-type JDocument = (JValue, Whitespace)
+type JValue = (Space, PureJValue, Space)
 
-data JValue = JString Whitespace String
-            | JNumber Whitespace String
+type Space = String
 
-type Whitespace = String
+data PureJValue = JString String
+                | JNumber String
 
+-- PRINT
 
-parseJDoc :: String -> JDocument
-parseJDoc input = (value, whitespace)
-    where (value, rest) = parseJValue input
-          (whitespace, []) = parseSpace rest
+printJValue :: JValue -> String
+printJValue (spaceBefore, pureJValue, spaceAfter) =
+    spaceBefore ++ (printPureJValue pureJValue) ++ spaceAfter
+        where printPureJValue (JString string) = "\"" ++ string ++ "\""
+              printPureJValue (JNumber string) = string
 
-printJDoc :: JDocument -> String
-printJDoc (JString spaceBefore string, spaceAfter) =
-    spaceBefore ++ "\"" ++ string ++ "\"" ++ spaceAfter
-printJDoc (JNumber spaceBefore string, spaceAfter) =
-    spaceBefore ++ string ++ spaceAfter
+-- PARSE
 
+parseDocument :: String -> JValue
+parseDocument input = jvalue
+    where (jvalue, []) = parseJValue input
 
 parseJValue :: String -> (JValue, String)
-parseJValue input
-    | isStringStart restInput = let (x, xs) = parseStringValue restInput in (JString whitespace x, xs)
-    | isNumberStart restInput = let (x, xs) = parseNumberValue restInput in (JNumber whitespace x, xs)
-    where
-        (whitespace, restInput) = parseSpace input
+parseJValue input = let (spaceBefore, restInput1) = parseSpace input
+                        (pureJValue , restInput2) = parsePureJValue restInput1
+                        (spaceAfter , restInput3) = parseSpace restInput2
+                    in ((spaceBefore, pureJValue, spaceAfter), restInput3)
+                    where
+    parsePureJValue input
+        | isStringStart input = let (x, xs) = parseStringValue input in ((JString x), xs)
+        | isNumberStart input = let (x, xs) = parseNumberValue input in ((JNumber x), xs)
+
 
 isStringStart ('"':xs) = True
 isStringStart _        = False
-
-isNumberStart (x:xs)
-    | x `elem` "123456789" = True
-    | otherwise            = False
-
-parseSpace :: String -> (Whitespace, String)
-parseSpace "" = ("", "")
-parseSpace (x:xs)
-    | isSpace x = addToFirst x (parseSpace xs)
-    | otherwise = ("", (x:xs))
-    where
-        isSpace x = x `elem` [' ', '\n']
 
 parseStringValue :: String -> (String, String)
 parseStringValue ('"':xs) = eatUntilEOS xs
@@ -50,10 +44,22 @@ parseStringValue ('"':xs) = eatUntilEOS xs
           eatUntilEOS ('"':xs) = ([], xs)
           eatUntilEOS (x:xs)   = addToFirst x (eatUntilEOS xs)
 
+isNumberStart (x:xs)
+    | x `elem` "123456789" = True
+    | otherwise            = False
+
 parseNumberValue :: String -> (String, String)
 parseNumberValue (x:xs)
     | x `elem` "1234567890" = addToFirst x (parseNumberValue xs)
     | otherwise             = ("", (x:xs))
+
+parseSpace :: String -> (String, String)
+parseSpace "" = ("", "")
+parseSpace (x:xs)
+    | isSpace x = addToFirst x (parseSpace xs)
+    | otherwise = ("", (x:xs))
+    where
+        isSpace x = x `elem` [' ', '\n']
 
 addToFirst :: a -> ([a], [a]) -> ([a], [a])
 addToFirst a (b, c) = (a:b, c)
