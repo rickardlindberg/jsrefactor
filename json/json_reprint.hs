@@ -1,3 +1,5 @@
+import Data.List (intercalate)
+
 main = interact reprint
     where reprint = printJValue . parseDocument
 
@@ -9,14 +11,16 @@ type Space = String
 
 data PureJValue = JString String
                 | JNumber String
+                | JList [JValue]
 
 -- PRINT
 
 printJValue :: JValue -> String
 printJValue (spaceBefore, pureJValue, spaceAfter) =
     spaceBefore ++ (printPureJValue pureJValue) ++ spaceAfter
-        where printPureJValue (JString string) = "\"" ++ string ++ "\""
-              printPureJValue (JNumber string) = string
+        where printPureJValue (JString x) = "\"" ++ x ++ "\""
+              printPureJValue (JNumber x) = x
+              printPureJValue (JList   x) = "[" ++ (intercalate "," (map printJValue x)) ++ "]"
 
 -- PARSE
 
@@ -33,6 +37,7 @@ parseJValue input = let (spaceBefore, restInput1) = parseSpace input
     parsePureJValue input
         | isStringStart input = let (x, xs) = parseStringValue input in ((JString x), xs)
         | isNumberStart input = let (x, xs) = parseNumberValue input in ((JNumber x), xs)
+        | isListStart   input = let (x, xs) = parseList        input in ((JList   x), xs)
 
 
 isStringStart ('"':xs) = True
@@ -52,6 +57,25 @@ parseNumberValue :: String -> (String, String)
 parseNumberValue (x:xs)
     | x `elem` "1234567890" = addToFirst x (parseNumberValue xs)
     | otherwise             = ("", (x:xs))
+
+isListStart (x:xs)
+    | x `elem` "[" = True
+    | otherwise    = False
+
+parseList :: String -> ([JValue], String)
+parseList ('[':restInput) = parseFirstItem restInput
+
+parseFirstItem :: String -> ([JValue], String)
+parseFirstItem (']':rest) = ([], rest)
+parseFirstItem (rest)     = let (value, restInput) = parseJValue rest
+                                (x, xs) = parseItems restInput
+                            in (value:x, xs)
+
+parseItems :: String -> ([JValue], String)
+parseItems (']':rest) = ([], rest)
+parseItems (',':rest) = let (value, restInput) = parseJValue rest
+                            (x, xs) = parseItems restInput
+                        in (value:x, xs)
 
 parseSpace :: String -> (String, String)
 parseSpace "" = ("", "")
