@@ -15,7 +15,7 @@ type Space = String
 
 data PureJValue = JString String
                 | JNumber String
-                | JList [JValue]
+                | JList Space [JValue]
 
 -- PRINT
 
@@ -24,7 +24,7 @@ printJValue (spaceBefore, pureJValue, spaceAfter) =
     spaceBefore ++ (printPureJValue pureJValue) ++ spaceAfter
         where printPureJValue (JString x) = "\"" ++ x ++ "\""
               printPureJValue (JNumber x) = x
-              printPureJValue (JList   x) = "[" ++ (intercalate "," (map printJValue x)) ++ "]"
+              printPureJValue (JList   space x) = "[" ++ space ++ (intercalate "," (map printJValue x)) ++ "]"
 
 -- PARSE
 
@@ -47,10 +47,11 @@ pJNumber = (eatAtLeastOneChars "1234567890") `pConvert` toJNumber
     where toJNumber a = JNumber a
 
 pJList = (expect "[") `pAnd`
+         (space) `pAnd`
          (pList "," pJValue) `pAnd`
          (expect "]") `pConvert`
          toJList
-    where toJList ((a, b), c) = JList b
+    where toJList (((a, b), c), d) = JList b c
 
 -- PARSE LIBRARY
 
