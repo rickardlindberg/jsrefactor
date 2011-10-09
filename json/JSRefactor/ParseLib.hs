@@ -1,4 +1,4 @@
-module ParseLib
+module JSRefactor.ParseLib
     (
       Parser
     , ParseState(..)

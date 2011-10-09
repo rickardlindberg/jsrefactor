@@ -1,4 +1,4 @@
-import ParseLib (ParseState(..))
+import JSRefactor.ParseLib (ParseState(..))
 import JSRefactor.JSON.Parser (pJValue)
 import JSRefactor.JSON.Printer (printJValue)
 

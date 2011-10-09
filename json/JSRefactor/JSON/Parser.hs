@@ -5,7 +5,7 @@ module JSRefactor.JSON.Parser
     , PureJValue(..)
     ) where
 
-import ParseLib
+import JSRefactor.ParseLib
 import JSRefactor.JSON.Types
 
 pJValue :: Parser JValue
