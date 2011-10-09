@@ -1,7 +1,11 @@
 import Data.List (intercalate, stripPrefix)
 
 main = interact reprint
-    where reprint = printJValue . parseDocument
+
+reprint input =
+    case pJValue (ParseState input) of
+        Left  msg        -> msg
+        Right (value, _) -> printJValue value
 
 -- DATA
 
@@ -24,72 +28,6 @@ printJValue (spaceBefore, pureJValue, spaceAfter) =
 
 -- PARSE
 
-parseDocument :: String -> JValue
-parseDocument input = jvalue
-    where (jvalue, []) = parseJValue input
-
-parseJValue :: String -> (JValue, String)
-parseJValue input = let (spaceBefore, restInput1) = parseSpace input
-                        (pureJValue , restInput2) = parsePureJValue restInput1
-                        (spaceAfter , restInput3) = parseSpace restInput2
-                    in ((spaceBefore, pureJValue, spaceAfter), restInput3)
-                    where
-    parsePureJValue input
-        | isStringStart input = let (x, xs) = parseStringValue input in ((JString x), xs)
-        | isNumberStart input = let (x, xs) = parseNumberValue input in ((JNumber x), xs)
-        | isListStart   input = let (x, xs) = parseList        input in ((JList   x), xs)
-
-
-isStringStart ('"':xs) = True
-isStringStart _        = False
-
-parseStringValue :: String -> (String, String)
-parseStringValue ('"':xs) = eatUntilEOS xs
-    where eatUntilEOS []       = ([], [])
-          eatUntilEOS ('"':xs) = ([], xs)
-          eatUntilEOS (x:xs)   = addToFirst x (eatUntilEOS xs)
-
-isNumberStart (x:xs)
-    | x `elem` "123456789" = True
-    | otherwise            = False
-
-parseNumberValue :: String -> (String, String)
-parseNumberValue (x:xs)
-    | x `elem` "1234567890" = addToFirst x (parseNumberValue xs)
-    | otherwise             = ("", (x:xs))
-
-isListStart (x:xs)
-    | x `elem` "[" = True
-    | otherwise    = False
-
-parseList :: String -> ([JValue], String)
-parseList ('[':restInput) = parseFirstItem restInput
-
-parseFirstItem :: String -> ([JValue], String)
-parseFirstItem (']':rest) = ([], rest)
-parseFirstItem (rest)     = let (value, restInput) = parseJValue rest
-                                (x, xs) = parseItems restInput
-                            in (value:x, xs)
-
-parseItems :: String -> ([JValue], String)
-parseItems (']':rest) = ([], rest)
-parseItems (',':rest) = let (value, restInput) = parseJValue rest
-                            (x, xs) = parseItems restInput
-                        in (value:x, xs)
-
-parseSpace :: String -> (String, String)
-parseSpace "" = ("", "")
-parseSpace (x:xs)
-    | isSpace x = addToFirst x (parseSpace xs)
-    | otherwise = ("", (x:xs))
-    where
-        isSpace x = x `elem` [' ', '\n']
-
-addToFirst :: a -> ([a], [a]) -> ([a], [a])
-addToFirst a (b, c) = (a:b, c)
-
--- XXXX
-
 pJValue :: Parser JValue
 
 pJValue = (space `pAnd` pPureJValue `pAnd` space) `pConvert` toJValue
@@ -100,12 +38,12 @@ space = eatChars " \n"
 pPureJValue = pJString `pOr` pJNumber `pOr` pJList
 
 pJString = (expect "\"") `pAnd`
-           (eatChars (['a'..'z'] ++ ['A'..'Z'] ++ "_")) `pAnd`
+           (eatAtLeastOneChars (['a'..'z'] ++ ['A'..'Z'] ++ "_ ")) `pAnd`
            (expect "\"") `pConvert`
            toJString
     where toJString ((a, b), c) = JString b
 
-pJNumber = (eatChars "1234567890") `pConvert` toJNumber
+pJNumber = (eatAtLeastOneChars "1234567890") `pConvert` toJNumber
     where toJNumber a = JNumber a
 
 pJList = (expect "[") `pAnd`
@@ -127,6 +65,12 @@ expect string (ParseState input) =
     case string `stripPrefix` input of
         Nothing        -> Left "Did not find expected string"
         Just restInput -> Right (string, ParseState restInput)
+
+eatAtLeastOneChars :: [Char] -> Parser String
+eatAtLeastOneChars chars state =
+    case eatChars chars state of
+        Right ("", state) -> Left("Expected at least one char")
+        foo               -> foo
 
 eatChars :: [Char] -> Parser String
 eatChars chars (ParseState input) = Right(parsed, ParseState rest)
@@ -157,7 +101,21 @@ pConvert parser predicate state =
 pList :: String -> Parser a -> Parser [a]
 pList separator itemParser state =
     case itemParser state of
-        Left msg                -> Left msg
-        Right (item, nextState) -> Right (item:restItems, restState)
-            where restItems = []
-                  restState = nextState
+        Left _                  -> Right ([], state)
+        Right (item, nextState) ->
+            case pRestList separator itemParser nextState of
+                Left msg -> Left msg
+                Right (items, nextState) -> Right (item:items, nextState)
+
+pRestList :: String -> Parser a -> Parser [a]
+pRestList separator itemParser =
+    pWhile (expect separator `pAnd` itemParser `pConvert` foo)
+        where foo (a, b) = b
+
+pWhile :: Parser a -> Parser [a]
+pWhile parser state =
+    case parser state of
+        Left msg             -> Right ([], state)
+        Right (a, nextState) ->
+            case pWhile parser nextState of
+                Right (list, nextState) -> Right (a:list, nextState)
