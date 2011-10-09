@@ -4,7 +4,7 @@ import glob
 import subprocess
 
 def run_tests():
-    for json_file in glob.glob("*.json"):
+    for json_file in glob.glob("tests/data/*.json"):
         run_json_reprint_test(json_file)
 
 def run_json_reprint_test(json_file):
