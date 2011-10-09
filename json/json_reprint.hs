@@ -1,6 +1,6 @@
-import ParseLib
-import JSONParser
-import Printer
+import ParseLib (ParseState(..))
+import JSONParser (pJValue)
+import Printer (printJValue)
 
 main = interact reprint
 
