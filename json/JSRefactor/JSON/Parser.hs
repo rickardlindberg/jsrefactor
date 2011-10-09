@@ -1,4 +1,4 @@
-module JSONParser
+module JSRefactor.JSON.Parser
     (
       JValue
     , pJValue

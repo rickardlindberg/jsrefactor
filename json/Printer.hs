@@ -4,7 +4,7 @@ module Printer
     ) where
 
 import Data.List (intercalate)
-import JSONParser
+import JSRefactor.JSON.Parser
 
 printJValue :: JValue -> String
 printJValue (spaceBefore, pureJValue, spaceAfter) =

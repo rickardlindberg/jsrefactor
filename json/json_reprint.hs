@@ -1,5 +1,5 @@
 import ParseLib (ParseState(..))
-import JSONParser (pJValue)
+import JSRefactor.JSON.Parser (pJValue)
 import Printer (printJValue)
 
 main = interact reprint
