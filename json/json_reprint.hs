@@ -1,4 +1,4 @@
-import Data.List (intercalate)
+import Data.List (intercalate, stripPrefix)
 
 main = interact reprint
     where reprint = printJValue . parseDocument
@@ -87,3 +87,77 @@ parseSpace (x:xs)
 
 addToFirst :: a -> ([a], [a]) -> ([a], [a])
 addToFirst a (b, c) = (a:b, c)
+
+-- XXXX
+
+pJValue :: Parser JValue
+
+pJValue = (space `pAnd` pPureJValue `pAnd` space) `pConvert` toJValue
+    where toJValue ((s1, p), s2) = (s1, p, s2)
+
+space = eatChars " \n"
+
+pPureJValue = pJString `pOr` pJNumber `pOr` pJList
+
+pJString = (expect "\"") `pAnd`
+           (eatChars (['a'..'z'] ++ ['A'..'Z'] ++ "_")) `pAnd`
+           (expect "\"") `pConvert`
+           toJString
+    where toJString ((a, b), c) = JString b
+
+pJNumber = (eatChars "1234567890") `pConvert` toJNumber
+    where toJNumber a = JNumber a
+
+pJList = (expect "[") `pAnd`
+         (pList "," pJValue) `pAnd`
+         (expect "]") `pConvert`
+         toJList
+    where toJList ((a, b), c) = JList b
+
+-- PARSE LIBRARY
+
+type Parser a = ParseState -> (Either ErrorMessage (a, ParseState))
+data ParseState = ParseState {
+    input :: String
+}
+type ErrorMessage = String
+
+expect :: String -> Parser String
+expect string (ParseState input) =
+    case string `stripPrefix` input of
+        Nothing        -> Left "Did not find expected string"
+        Just restInput -> Right (string, ParseState restInput)
+
+eatChars :: [Char] -> Parser String
+eatChars chars (ParseState input) = Right(parsed, ParseState rest)
+    where parsed = takeWhile (\s -> s `elem` chars) input
+          rest   = drop (length parsed) input
+
+pOr :: Parser a -> Parser a -> Parser a
+pOr first second state =
+    case first state of
+        Left (a)     -> second state
+        Right (a, b) -> Right (a, b)
+
+pAnd :: Parser a -> Parser b -> Parser (a, b)
+pAnd first second state =
+    case first state of
+        Left (msg)               -> Left (msg)
+        Right (aValue, newState) ->
+            case second newState of
+                Left (msg)               -> Left (msg)
+                Right (bValue, newState) -> Right ((aValue, bValue), newState)
+
+pConvert :: Parser a -> (a -> b) -> Parser b
+pConvert parser predicate state =
+    case parser state of
+        Left (msg)          -> Left (msg)
+        Right (a, newState) -> Right(predicate a, newState)
+
+pList :: String -> Parser a -> Parser [a]
+pList separator itemParser state =
+    case itemParser state of
+        Left msg                -> Left msg
+        Right (item, nextState) -> Right (item:restItems, restState)
+            where restItems = []
+                  restState = nextState
