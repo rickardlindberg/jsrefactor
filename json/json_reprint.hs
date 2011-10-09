@@ -1,6 +1,6 @@
 import ParseLib (ParseState(..))
 import JSRefactor.JSON.Parser (pJValue)
-import Printer (printJValue)
+import JSRefactor.JSON.Printer (printJValue)
 
 main = interact reprint
 

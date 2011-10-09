@@ -1,4 +1,4 @@
-module Printer
+module JSRefactor.JSON.Printer
     (
       printJValue
     ) where
