@@ -1,20 +1,12 @@
 module JSRefactor.JSON.Parser
     (
-      JValue
-    , pJValue
+      pJValue
     , Space
     , PureJValue(..)
     ) where
 
 import ParseLib
-
-type JValue = (Space, PureJValue, Space)
-
-type Space = String
-
-data PureJValue = JString String
-                | JNumber String
-                | JList Space [JValue]
+import JSRefactor.JSON.Types
 
 pJValue :: Parser JValue
 

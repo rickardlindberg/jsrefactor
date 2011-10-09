@@ -5,6 +5,7 @@ module JSRefactor.JSON.Printer
 
 import Data.List (intercalate)
 import JSRefactor.JSON.Parser
+import JSRefactor.JSON.Types
 
 printJValue :: JValue -> String
 printJValue (spaceBefore, pureJValue, spaceAfter) =
