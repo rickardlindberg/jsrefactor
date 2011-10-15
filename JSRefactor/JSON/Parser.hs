@@ -3,8 +3,8 @@ module JSRefactor.JSON.Parser
       parseJSONFile
     ) where
 
-import JSRefactor.ParseLib
 import JSRefactor.JSON.Types
+import JSRefactor.ParseLib
 
 parseJSONFile :: String -> Either ErrorMessage JValue
 parseJSONFile input =
