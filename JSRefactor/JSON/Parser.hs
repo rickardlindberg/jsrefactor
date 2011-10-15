@@ -8,9 +8,13 @@ import JSRefactor.JSON.Types
 
 parseJSONFile :: String -> Either ErrorMessage JValue
 parseJSONFile input =
-    case wrappedValue (ParseState input) of
+    case jsonFile (ParseState input) of
         Left  errorMessage -> Left  errorMessage
         Right (value, _)   -> Right value
+
+jsonFile      =  wrappedValue
+             <&> eof
+             ==> (\(a, b) -> a)
 
 wrappedValue  =  space
              <&> value

@@ -8,11 +8,21 @@ import subprocess
 def run_tests():
     for json_file in glob.glob("tests/data/*.json"):
         run_json_reprint_test(json_file)
+    for json_file in glob.glob("tests/invalid_data/*.json"):
+        run_json_invalid(json_file)
 
 def run_json_reprint_test(json_file):
     input_ = open(json_file).read()
     (output, returncode) = run(["runghc", "tests/json_reprint.hs"], input_)
     if returncode == 0 and output == input_:
+        print "json_reprint %s: OK" % json_file
+    else:
+        print "json_reprint %s: FAIL, GOT:\n%s" % (json_file, indent(output))
+
+def run_json_invalid(json_file):
+    input_ = open(json_file).read()
+    (output, returncode) = run(["runghc", "tests/json_print_status.hs"], input_)
+    if returncode == 0 and output.startswith("FAILURE"):
         print "json_reprint %s: OK" % json_file
     else:
         print "json_reprint %s: FAIL, GOT:\n%s" % (json_file, indent(output))

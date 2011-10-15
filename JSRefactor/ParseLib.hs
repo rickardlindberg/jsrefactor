@@ -6,6 +6,7 @@ module JSRefactor.ParseLib
     , terminal
     , eatAtLeastOneChars
     , eatChars
+    , eof
     , (<|>)
     , (<&>)
     , (==>)
@@ -36,6 +37,10 @@ eatChars :: [Char] -> Parser String
 eatChars chars (ParseState input) = Right(parsed, ParseState rest)
     where parsed = takeWhile (\s -> s `elem` chars) input
           rest   = drop (length parsed) input
+
+eof :: Parser String
+eof (ParseState "") = Right ("", (ParseState ""))
+eof _ = Left "Expected EOF"
 
 (<|>) :: Parser a -> Parser a -> Parser a
 (first <|> second) state =
