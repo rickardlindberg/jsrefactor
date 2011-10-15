@@ -6,51 +6,54 @@ module JSRefactor.JSON.Parser
 import JSRefactor.JSON.Types
 import JSRefactor.ParseLib
 
-parseJSONFile :: String -> Either ErrorMessage WrappedValue
+parseJSONFile :: String -> Either ErrorMessage Value
 parseJSONFile input =
     case jsonFile (ParseState input) of
         Left  errorMessage -> Left  errorMessage
         Right (value, _)   -> Right value
 
-jsonFile      =  wrappedValue
+jsonFile      =  value
              <&> eof
-             ==> (\(a, b) -> a)
-
-wrappedValue  =  space
-             <&> value
-             <&> space
-             ==> (\((s1, p), s2) -> WrappedValue s1 p s2)
+             ==> (\(v, _) -> v)
 
 value         =  string
              <|> number
              <|> array
              <|> object
 
-string        =  (terminal "\"")
+string        =  space
+             <&> (terminal "\"")
              <&> (eatAtLeastOneChars (['a'..'z'] ++ ['A'..'Z'] ++ "_ ")) 
              <&> (terminal "\"")
-             ==> (\((a, b), c) -> String b)
+             <&> space
+             ==> (\((((s1, _), v), _), s2) -> String s1 v s2)
 
-number        =  (eatAtLeastOneChars "1234567890")
-             ==> Number
+number        =  space
+             <&> (eatAtLeastOneChars "1234567890")
+             <&> space
+             ==> (\((s1, v), s2) -> Number s1 v s2)
 
-array         =  (terminal "[")
-             <&> (space)
-             <&> (pList "," wrappedValue)
+array         =  space
+             <&> (terminal "[")
+             <&> space
+             <&> (pList "," value)
              <&> (terminal "]")
-             ==> (\(((a, b), c), d) -> Array b c)
+             <&> space
+             ==> (\(((((s1, _), s2), v), _), s3) -> Array s1 s2 v s3)
 
-object        =  (terminal "{")
+object        =  space
+             <&> (terminal "{")
              <&> space
              <&> (pList "," pair)
              <&> (terminal "}")
-             ==> (\(((t1, space), pairs), t2) -> Object space pairs)
+             <&> space
+             ==> (\(((((s1, _), s2), v), _), s3) -> Object s1 s2 v s3)
 
 pair          =  space
              <&> string
              <&> space
              <&> (terminal ":")
-             <&> wrappedValue
-             ==> (\((((s1, key), s2), t), value) -> Pair (s1, key, s2) value)
+             <&> value
+             ==> (\((((s1, k), s2), _), v) -> Pair (s1, k, s2) v)
 
 space         =  eatChars " \n"

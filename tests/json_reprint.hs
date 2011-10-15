@@ -1,9 +1,9 @@
 import JSRefactor.JSON.Parser (parseJSONFile)
-import JSRefactor.JSON.Printer (printWrappedValue)
+import JSRefactor.JSON.Printer (printValue)
 
 main = interact reprint
 
 reprint input =
     case parseJSONFile input of
         Left  errorMessage -> errorMessage
-        Right value        -> printWrappedValue value
+        Right value        -> printValue value

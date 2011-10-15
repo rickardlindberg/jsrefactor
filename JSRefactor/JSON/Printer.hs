@@ -1,25 +1,25 @@
 module JSRefactor.JSON.Printer
     (
-      printWrappedValue
+      printValue
     ) where
 
 import Data.List (intercalate)
 import JSRefactor.JSON.Parser
 import JSRefactor.JSON.Types
 
-printWrappedValue :: WrappedValue -> String
+printValue :: Value -> String
 
-printWrappedValue (WrappedValue spaceBefore pureJValue spaceAfter) =
-    spaceBefore ++ (printValue pureJValue) ++ spaceAfter
+printValue (String s1 v s2) =
+    s1 ++ "\"" ++ v ++ "\"" ++ s2
 
-printValue (String string) =
-    "\"" ++ string ++ "\""
-printValue (Number number) =
-    number
-printValue (Array space values) =
-    "[" ++ space ++ (intercalate "," (map printWrappedValue values)) ++ "]"
-printValue (Object space pairs) =
-    "{" ++ space ++ (intercalate "," (map printPair pairs)) ++ "}"
+printValue (Number s1 v s2) =
+    s1 ++ v ++ s2
 
-printPair (Pair (s1, pure, s2) val) =
-    s1 ++ (printValue pure) ++ s2 ++ ":" ++ (printWrappedValue val)
+printValue (Array s1 s2 vs s3) =
+    s1 ++ "[" ++ s2 ++ (intercalate "," (map printValue vs)) ++ "]" ++ s3
+
+printValue (Object s1 s2 vs s3) =
+    s1 ++ "{" ++ s2 ++ (intercalate "," (map printPair vs)) ++ "}" ++ s3
+
+printPair (Pair (s1, k, s2) v) =
+    s1 ++ (printValue k) ++ s2 ++ ":" ++ (printValue v)

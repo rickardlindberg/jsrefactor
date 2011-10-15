@@ -1,15 +1,14 @@
 module JSRefactor.JSON.Types
     (
-      WrappedValue(..)
-    , Value(..)
+      Value(..)
     , Pair(..)
     ) where
 
-data WrappedValue = WrappedValue String Value String
+data Value = String WhiteSpace String         WhiteSpace
+           | Number WhiteSpace String         WhiteSpace
+           | Array  WhiteSpace String [Value] WhiteSpace
+           | Object WhiteSpace String [Pair ] WhiteSpace
 
-data Value = String String
-           | Number String
-           | Array  String [WrappedValue]
-           | Object String [Pair]
+data Pair  = Pair (WhiteSpace, Value, WhiteSpace) Value
 
-data Pair = Pair (String, Value, String) WrappedValue
+type WhiteSpace = String
