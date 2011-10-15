@@ -13,3 +13,6 @@ printJValue (spaceBefore, pureJValue, spaceAfter) =
         where printPureJValue (JString x) = "\"" ++ x ++ "\""
               printPureJValue (JNumber x) = x
               printPureJValue (JList   space x) = "[" ++ space ++ (intercalate "," (map printJValue x)) ++ "]"
+              printPureJValue (JObject space x) = "{" ++ space ++ (pairs x) ++ "}"
+              pairs x = (intercalate "," (map foo x))
+              foo ((s1, pure, s2), val) = s1 ++ (printPureJValue pure) ++ s2 ++ ":" ++ (printJValue val)

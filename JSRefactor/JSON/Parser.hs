@@ -24,6 +24,7 @@ wrappedValue  =  space
 value         =  string
              <|> number
              <|> array
+             <|> object
 
 string        =  (terminal "\"")
              <&> (eatAtLeastOneChars (['a'..'z'] ++ ['A'..'Z'] ++ "_ ")) 
@@ -38,5 +39,18 @@ array         =  (terminal "[")
              <&> (pList "," wrappedValue)
              <&> (terminal "]")
              ==> (\(((a, b), c), d) -> JList b c)
+
+object        =  (terminal "{")
+             <&> space
+             <&> (pList "," pair)
+             <&> (terminal "}")
+             ==> (\(((t1, space), pairs), t2) -> JObject space pairs)
+
+pair          =  space
+             <&> string
+             <&> space
+             <&> (terminal ":")
+             <&> wrappedValue
+             ==> (\((((s1, key), s2), t), value) -> ((s1, key, s2), value))
 
 space         =  eatChars " \n"
