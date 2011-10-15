@@ -1,34 +1,35 @@
 module JSRefactor.JSON.Parser
     (
-      pJValue
-    , Space
-    , PureJValue(..)
+      parseJSONFile
     ) where
 
 import JSRefactor.ParseLib
 import JSRefactor.JSON.Types
 
-pJValue :: Parser JValue
+parseJSONFile :: Parser JValue
+parseJSONFile = wrappedValue
 
-pJValue = (space `pAnd` pPureJValue `pAnd` space) `pConvert` toJValue
-    where toJValue ((s1, p), s2) = (s1, p, s2)
+wrappedValue  =  space
+             <&> value
+             <&> space
+             ==> (\((s1, p), s2) -> (s1, p, s2))
 
-space = eatChars " \n"
+value         =  string
+             <|> number
+             <|> array
 
-pPureJValue = pJString `pOr` pJNumber `pOr` pJList
+string        =  (terminal "\"")
+             <&> (eatAtLeastOneChars (['a'..'z'] ++ ['A'..'Z'] ++ "_ ")) 
+             <&> (terminal "\"")
+             ==> (\((a, b), c) -> JString b)
 
-pJString = (expect "\"") `pAnd`
-           (eatAtLeastOneChars (['a'..'z'] ++ ['A'..'Z'] ++ "_ ")) `pAnd`
-           (expect "\"") `pConvert`
-           toJString
-    where toJString ((a, b), c) = JString b
+number        =  (eatAtLeastOneChars "1234567890")
+             ==> JNumber
 
-pJNumber = (eatAtLeastOneChars "1234567890") `pConvert` toJNumber
-    where toJNumber a = JNumber a
+array         =  (terminal "[")
+             <&> (space)
+             <&> (pList "," wrappedValue)
+             <&> (terminal "]")
+             ==> (\(((a, b), c), d) -> JList b c)
 
-pJList = (expect "[") `pAnd`
-         (space) `pAnd`
-         (pList "," pJValue) `pAnd`
-         (expect "]") `pConvert`
-         toJList
-    where toJList (((a, b), c), d) = JList b c
+space         =  eatChars " \n"
