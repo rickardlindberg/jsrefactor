@@ -1,16 +1,15 @@
 module JSRefactor.JSON.Types
     (
-      JValue
-    , PureJValue(..)
+      WrappedValue(..)
+    , Value(..)
+    , Pair(..)
     ) where
 
-type JValue = (String, PureJValue, String)
+data WrappedValue = WrappedValue String Value String
 
-data PureJValue = JString String
-                | JNumber String
-                | JList String [JValue]
-                | JObject String [JPair]
+data Value = String String
+           | Number String
+           | Array  String [WrappedValue]
+           | Object String [Pair]
 
-type JPair = (JKey, JValue)
-
-type JKey = (String, PureJValue, String)
+data Pair = Pair (String, Value, String) WrappedValue

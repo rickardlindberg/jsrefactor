@@ -6,7 +6,7 @@ module JSRefactor.JSON.Parser
 import JSRefactor.JSON.Types
 import JSRefactor.ParseLib
 
-parseJSONFile :: String -> Either ErrorMessage JValue
+parseJSONFile :: String -> Either ErrorMessage WrappedValue
 parseJSONFile input =
     case jsonFile (ParseState input) of
         Left  errorMessage -> Left  errorMessage
@@ -19,7 +19,7 @@ jsonFile      =  wrappedValue
 wrappedValue  =  space
              <&> value
              <&> space
-             ==> (\((s1, p), s2) -> (s1, p, s2))
+             ==> (\((s1, p), s2) -> WrappedValue s1 p s2)
 
 value         =  string
              <|> number
@@ -29,28 +29,28 @@ value         =  string
 string        =  (terminal "\"")
              <&> (eatAtLeastOneChars (['a'..'z'] ++ ['A'..'Z'] ++ "_ ")) 
              <&> (terminal "\"")
-             ==> (\((a, b), c) -> JString b)
+             ==> (\((a, b), c) -> String b)
 
 number        =  (eatAtLeastOneChars "1234567890")
-             ==> JNumber
+             ==> Number
 
 array         =  (terminal "[")
              <&> (space)
              <&> (pList "," wrappedValue)
              <&> (terminal "]")
-             ==> (\(((a, b), c), d) -> JList b c)
+             ==> (\(((a, b), c), d) -> Array b c)
 
 object        =  (terminal "{")
              <&> space
              <&> (pList "," pair)
              <&> (terminal "}")
-             ==> (\(((t1, space), pairs), t2) -> JObject space pairs)
+             ==> (\(((t1, space), pairs), t2) -> Object space pairs)
 
 pair          =  space
              <&> string
              <&> space
              <&> (terminal ":")
              <&> wrappedValue
-             ==> (\((((s1, key), s2), t), value) -> ((s1, key, s2), value))
+             ==> (\((((s1, key), s2), t), value) -> Pair (s1, key, s2) value)
 
 space         =  eatChars " \n"

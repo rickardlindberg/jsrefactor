@@ -1,25 +1,25 @@
 module JSRefactor.JSON.Printer
     (
-      printJValue
+      printWrappedValue
     ) where
 
 import Data.List (intercalate)
 import JSRefactor.JSON.Parser
 import JSRefactor.JSON.Types
 
-printJValue :: JValue -> String
+printWrappedValue :: WrappedValue -> String
 
-printJValue (spaceBefore, pureJValue, spaceAfter) =
-    spaceBefore ++ (printPureJValue pureJValue) ++ spaceAfter
+printWrappedValue (WrappedValue spaceBefore pureJValue spaceAfter) =
+    spaceBefore ++ (printValue pureJValue) ++ spaceAfter
 
-printPureJValue (JString string) =
+printValue (String string) =
     "\"" ++ string ++ "\""
-printPureJValue (JNumber number) =
+printValue (Number number) =
     number
-printPureJValue (JList space values) =
-    "[" ++ space ++ (intercalate "," (map printJValue values)) ++ "]"
-printPureJValue (JObject space pairs) =
+printValue (Array space values) =
+    "[" ++ space ++ (intercalate "," (map printWrappedValue values)) ++ "]"
+printValue (Object space pairs) =
     "{" ++ space ++ (intercalate "," (map printPair pairs)) ++ "}"
 
-printPair ((s1, pure, s2), val) =
-    s1 ++ (printPureJValue pure) ++ s2 ++ ":" ++ (printJValue val)
+printPair (Pair (s1, pure, s2) val) =
+    s1 ++ (printValue pure) ++ s2 ++ ":" ++ (printWrappedValue val)
