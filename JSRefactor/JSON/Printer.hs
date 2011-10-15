@@ -8,11 +8,18 @@ import JSRefactor.JSON.Parser
 import JSRefactor.JSON.Types
 
 printJValue :: JValue -> String
+
 printJValue (spaceBefore, pureJValue, spaceAfter) =
     spaceBefore ++ (printPureJValue pureJValue) ++ spaceAfter
-        where printPureJValue (JString x) = "\"" ++ x ++ "\""
-              printPureJValue (JNumber x) = x
-              printPureJValue (JList   space x) = "[" ++ space ++ (intercalate "," (map printJValue x)) ++ "]"
-              printPureJValue (JObject space x) = "{" ++ space ++ (pairs x) ++ "}"
-              pairs x = (intercalate "," (map foo x))
-              foo ((s1, pure, s2), val) = s1 ++ (printPureJValue pure) ++ s2 ++ ":" ++ (printJValue val)
+
+printPureJValue (JString string) =
+    "\"" ++ string ++ "\""
+printPureJValue (JNumber number) =
+    number
+printPureJValue (JList space values) =
+    "[" ++ space ++ (intercalate "," (map printJValue values)) ++ "]"
+printPureJValue (JObject space pairs) =
+    "{" ++ space ++ (intercalate "," (map printPair pairs)) ++ "}"
+
+printPair ((s1, pure, s2), val) =
+    s1 ++ (printPureJValue pure) ++ s2 ++ ":" ++ (printJValue val)
