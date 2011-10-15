@@ -1,8 +1,6 @@
 module JSRefactor.ParseLib
     (
-      Parser
-    , ParseState(..)
-    , ErrorMessage
+      initialParseState
     , terminal
     , eatAtLeastOneChars
     , eatChars
@@ -10,16 +8,18 @@ module JSRefactor.ParseLib
     , (<|>)
     , (<&>)
     , (==>)
-    , pList
+    , separatedListOf
     ) where
 
 import Data.List (stripPrefix)
 
-type Parser a = ParseState -> (Either ErrorMessage (a, ParseState))
+type Parser a = ParseState -> (Either String (a, ParseState))
+
 data ParseState = ParseState {
     input :: String
 }
-type ErrorMessage = String
+
+initialParseState input = ParseState input
 
 terminal :: String -> Parser String
 terminal string (ParseState input) =
@@ -63,8 +63,8 @@ eof _ = Left "Expected EOF"
         Left (msg)          -> Left (msg)
         Right (a, newState) -> Right(predicate a, newState)
 
-pList :: String -> Parser a -> Parser [a]
-pList separator itemParser state =
+separatedListOf :: String -> Parser a -> Parser [a]
+separatedListOf separator itemParser state =
     case itemParser state of
         Left _                  -> Right ([], state)
         Right (item, nextState) ->

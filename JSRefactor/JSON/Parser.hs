@@ -6,9 +6,9 @@ module JSRefactor.JSON.Parser
 import JSRefactor.JSON.Types
 import JSRefactor.ParseLib
 
-parseJSONFile :: String -> Either ErrorMessage Value
+parseJSONFile :: String -> Either String Value
 parseJSONFile input =
-    case jsonFile (ParseState input) of
+    case jsonFile (initialParseState input) of
         Left  errorMessage -> Left  errorMessage
         Right (value, _)   -> Right value
 
@@ -36,7 +36,7 @@ number        =  space
 array         =  space
              <&> (terminal "[")
              <&> space
-             <&> (pList "," value)
+             <&> ("," `separatedListOf` value)
              <&> (terminal "]")
              <&> space
              ==> (\(((((s1, _), s2), v), _), s3) -> Array s1 s2 v s3)
@@ -44,7 +44,7 @@ array         =  space
 object        =  space
              <&> (terminal "{")
              <&> space
-             <&> (pList "," pair)
+             <&> ("," `separatedListOf` pair)
              <&> (terminal "}")
              <&> space
              ==> (\(((((s1, _), s2), v), _), s3) -> Object s1 s2 v s3)
