@@ -6,8 +6,11 @@ module JSRefactor.JSON.Parser
 import JSRefactor.ParseLib
 import JSRefactor.JSON.Types
 
-parseJSONFile :: Parser JValue
-parseJSONFile = wrappedValue
+parseJSONFile :: String -> Either ErrorMessage JValue
+parseJSONFile input =
+    case wrappedValue (ParseState input) of
+        Left  errorMessage -> Left  errorMessage
+        Right (value, _)   -> Right value
 
 wrappedValue  =  space
              <&> value
