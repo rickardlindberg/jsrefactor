@@ -10,6 +10,7 @@ def run_tests():
         run_json_reprint_test(json_file)
     for json_file in glob.glob("tests/invalid_data/*.json"):
         run_json_invalid(json_file)
+    run_quickcheck()
 
 def run_json_reprint_test(json_file):
     input_ = open(json_file).read()
@@ -34,6 +35,9 @@ def run(command, input_):
 
 def indent(text):
     return "\n".join("    " + x for x in text.split("\n"))
+
+def run_quickcheck():
+    subprocess.call(["runhaskell", "tests/properties.hs"])
 
 if __name__ == "__main__":
     os.chdir(os.path.join(os.path.dirname(__file__), ".."))
