@@ -15,11 +15,17 @@ printValue (String s1 v s2) =
 printValue (Number s1 v s2) =
     s1 ++ v ++ s2
 
-printValue (Array s1 s2 vs s3) =
-    s1 ++ "[" ++ s2 ++ (intercalate "," (map printValue vs)) ++ "]" ++ s3
+printValue (Array s1 v s2) =
+    s1 ++ "[" ++ (printInnerArray v) ++ "]" ++ s2
+    where
+        printInnerArray (Left  s) = s
+        printInnerArray (Right v) = (intercalate "," (map printValue v))
 
-printValue (Object s1 s2 vs s3) =
-    s1 ++ "{" ++ s2 ++ (intercalate "," (map printPair vs)) ++ "}" ++ s3
+printValue (Object s1 v s2) =
+    s1 ++ "{" ++ (printInnerObject v) ++ "}" ++ s2
+    where
+        printInnerObject (Left  s) = s
+        printInnerObject (Right v) = (intercalate "," (map printPair v))
 
 printPair (Pair s1 k s2 v) =
     s1 ++ (printString k) ++ s2 ++ ":" ++ (printValue v)

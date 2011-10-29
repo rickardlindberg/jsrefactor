@@ -33,19 +33,17 @@ number        =  space
 
 array         =  space
              <&> (terminal "[")
-             <&> space
-             <&> ("," `separatedListOf` value)
+             <&> ((("," `separatedListOf` value) ==> Right) <|> (space ==> Left))
              <&> (terminal "]")
              <&> space
-             ==> (\(((((s1, _), s2), v), _), s3) -> Array s1 s2 v s3)
+             ==> (\((((s1, _), v), _), s2) -> Array s1 v s2)
 
 object        =  space
              <&> (terminal "{")
-             <&> space
-             <&> ("," `separatedListOf` pair)
+             <&> ((("," `separatedListOf` pair) ==> Right) <|> (space ==> Left))
              <&> (terminal "}")
              <&> space
-             ==> (\(((((s1, _), s2), v), _), s3) -> Object s1 s2 v s3)
+             ==> (\((((s1, _), v), _), s2) -> Object s1 v s2)
 
 pair          =  space
              <&> barestring

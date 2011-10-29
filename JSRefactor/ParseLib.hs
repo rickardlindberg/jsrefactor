@@ -66,7 +66,7 @@ eof _ = Left "Expected EOF"
 separatedListOf :: String -> Parser a -> Parser [a]
 separatedListOf separator itemParser state =
     case itemParser state of
-        Left _                  -> Right ([], state)
+        Left _                  -> Left ("No items in list")
         Right (item, nextState) ->
             case pRestList separator itemParser nextState of
                 Left msg -> Left msg

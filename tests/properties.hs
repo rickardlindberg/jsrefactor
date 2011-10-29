@@ -1,4 +1,4 @@
-import Control.Monad (liftM3, liftM4)
+import Control.Monad
 import JSRefactor.JSON.Parser
 import JSRefactor.JSON.Printer
 import JSRefactor.JSON.Types
@@ -10,8 +10,8 @@ instance Arbitrary Value where
     arbitrary =
         oneof [ liftM3 String whitespace string whitespace
               , liftM3 Number whitespace number whitespace
-              , liftM4 Array  whitespace whitespace (listOf arbitrary) whitespace
-              , liftM4 Object whitespace whitespace (listOf arbitrary) whitespace
+              , liftM3 Array  whitespace (oneof [liftM Left whitespace, liftM Right (listOf arbitrary)]) whitespace
+              , liftM3 Object whitespace (oneof [liftM Left whitespace, liftM Right (listOf arbitrary)]) whitespace
               ]
 
 instance Arbitrary Pair where
