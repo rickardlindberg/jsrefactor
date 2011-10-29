@@ -10,8 +10,8 @@ instance Arbitrary Value where
     arbitrary =
         oneof [ liftM3 String whitespace string whitespace
               , liftM3 Number whitespace number whitespace
-              , liftM3 Array  whitespace (oneof [liftM Left whitespace, liftM Right (listOf arbitrary)]) whitespace
-              , liftM3 Object whitespace (oneof [liftM Left whitespace, liftM Right (listOf arbitrary)]) whitespace
+              , liftM3 Array  whitespace (oneof [liftM Left whitespace, liftM Right (listOf1 arbitrary)]) whitespace
+              , liftM3 Object whitespace (oneof [liftM Left whitespace, liftM Right (listOf1 arbitrary)]) whitespace
               ]
 
 instance Arbitrary Pair where
@@ -26,13 +26,19 @@ string = listOf (elements ['a'..'z'])
 
 -- Properties
 
-prop_parsed_and_printed_looks_the_same_as_original value =
+prop_parsed_and_printed_is_same_as_original value =
     let originalString = printValue value in
         case parseJSONFile originalString of
             Left  _      -> False
             Right value' -> (printValue value') == originalString
 
+prop_printed_and_parsed_is_same_as_original value =
+    case parseJSONFile (printValue value) of
+        Left  _      -> False
+        Right value' -> value' == value
+
 -- Runner
 
 main = do
-    quickCheckWith (stdArgs { maxSize = 3 }) prop_parsed_and_printed_looks_the_same_as_original
+    quickCheckWith (stdArgs { maxSize = 3 }) prop_parsed_and_printed_is_same_as_original
+    quickCheckWith (stdArgs { maxSize = 3 }) prop_printed_and_parsed_is_same_as_original
