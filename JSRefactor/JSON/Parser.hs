@@ -22,11 +22,9 @@ value         =  string
              <|> object
 
 string        =  space
-             <&> (terminal "\"")
-             <&> (eatChars (['a'..'z'] ++ ['A'..'Z'] ++ "_ ")) 
-             <&> (terminal "\"")
+             <&> barestring
              <&> space
-             ==> (\((((s1, _), v), _), s2) -> String s1 v s2)
+             ==> (\((s1, v), s2) -> String s1 v s2)
 
 number        =  space
              <&> (eatAtLeastOneChars "1234567890")
@@ -50,10 +48,15 @@ object        =  space
              ==> (\(((((s1, _), s2), v), _), s3) -> Object s1 s2 v s3)
 
 pair          =  space
-             <&> string
+             <&> barestring
              <&> space
              <&> (terminal ":")
              <&> value
-             ==> (\((((s1, k), s2), _), v) -> Pair (s1, k, s2) v)
+             ==> (\((((s1, k), s2), _), v) -> Pair s1 k s2 v)
+
+barestring    =  (terminal "\"")
+             <&> (eatChars (['a'..'z'] ++ ['A'..'Z'] ++ "_ ")) 
+             <&> (terminal "\"")
+             ==> (\((_, s), _) -> s)
 
 space         =  eatChars " \n"

@@ -11,7 +11,12 @@ instance Arbitrary Value where
         oneof [ liftM3 String whitespace string whitespace
               , liftM3 Number whitespace number whitespace
               , liftM4 Array  whitespace whitespace (listOf arbitrary) whitespace
+              , liftM4 Object whitespace whitespace (listOf arbitrary) whitespace
               ]
+
+instance Arbitrary Pair where
+    arbitrary =
+        liftM4 Pair whitespace string whitespace arbitrary
 
 whitespace = listOf (elements " \n")
 

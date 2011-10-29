@@ -10,7 +10,7 @@ import JSRefactor.JSON.Types
 printValue :: Value -> String
 
 printValue (String s1 v s2) =
-    s1 ++ "\"" ++ v ++ "\"" ++ s2
+    s1 ++ (printString v) ++ s2
 
 printValue (Number s1 v s2) =
     s1 ++ v ++ s2
@@ -21,5 +21,8 @@ printValue (Array s1 s2 vs s3) =
 printValue (Object s1 s2 vs s3) =
     s1 ++ "{" ++ s2 ++ (intercalate "," (map printPair vs)) ++ "}" ++ s3
 
-printPair (Pair (s1, k, s2) v) =
-    s1 ++ (printValue k) ++ s2 ++ ":" ++ (printValue v)
+printPair (Pair s1 k s2 v) =
+    s1 ++ (printString k) ++ s2 ++ ":" ++ (printValue v)
+
+printString v =
+    "\"" ++ v ++ "\""

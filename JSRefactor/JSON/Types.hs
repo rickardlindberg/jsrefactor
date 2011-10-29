@@ -4,13 +4,14 @@ module JSRefactor.JSON.Types
     , Pair(..)
     ) where
 
-data Value = String WhiteSpace String         WhiteSpace
-           | Number WhiteSpace String         WhiteSpace
-           | Array  WhiteSpace String [Value] WhiteSpace
-           | Object WhiteSpace String [Pair ] WhiteSpace
+data Value = String WhiteSpace String             WhiteSpace
+           | Number WhiteSpace Number             WhiteSpace
+           | Array  WhiteSpace WhiteSpace [Value] WhiteSpace
+           | Object WhiteSpace WhiteSpace [Pair ] WhiteSpace
            deriving (Eq, Show)
 
-data Pair  = Pair (WhiteSpace, Value, WhiteSpace) Value
+data Pair  = Pair WhiteSpace String WhiteSpace Value
            deriving (Eq, Show)
 
 type WhiteSpace = String
+type Number = String
