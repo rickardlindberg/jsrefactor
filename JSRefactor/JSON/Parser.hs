@@ -23,7 +23,7 @@ value         =  string
 
 string        =  space
              <&> (terminal "\"")
-             <&> (eatAtLeastOneChars (['a'..'z'] ++ ['A'..'Z'] ++ "_ ")) 
+             <&> (eatChars (['a'..'z'] ++ ['A'..'Z'] ++ "_ ")) 
              <&> (terminal "\"")
              <&> space
              ==> (\((((s1, _), v), _), s2) -> String s1 v s2)
