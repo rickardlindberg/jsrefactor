@@ -9,6 +9,8 @@ module JSRefactor.ParseLib
     , (<&>)
     , (==>)
     , separatedListOf
+    , many
+    , anyCharBut
     ) where
 
 import Data.List (stripPrefix)
@@ -24,8 +26,18 @@ initialParseState input = ParseState input
 terminal :: String -> Parser String
 terminal string (ParseState input) =
     case string `stripPrefix` input of
-        Nothing        -> Left "Did not find expected string"
+        Nothing        -> Left  ("Did not find expected string \"" ++ string ++ "\"")
         Just restInput -> Right (string, ParseState restInput)
+
+anyChar :: Parser Char
+anyChar (ParseState "")     = Left "Expected char but found EOF"
+anyChar (ParseState (x:xs)) = Right(x, ParseState xs)
+
+anyCharBut :: String -> Parser Char
+anyCharBut string (ParseState (x:xs)) =
+    case x `elem` string of
+        True  -> Left  ("Did not expect character '" ++ [x] ++ "'")
+        False -> Right (x, ParseState xs)
 
 eatAtLeastOneChars :: [Char] -> Parser String
 eatAtLeastOneChars chars state =
@@ -45,7 +57,10 @@ eof _ = Left "Expected EOF"
 (<|>) :: Parser a -> Parser a -> Parser a
 (first <|> second) state =
     case first state of
-        Left (a)     -> second state
+        Left  (a)    ->
+            case second state of
+                Left  (a')   -> Left (a ++ "\n" ++ a')
+                Right (a, b) -> Right (a, b)
         Right (a, b) -> Right (a, b)
 
 (<&>) :: Parser a -> Parser b -> Parser (a, b)
@@ -74,13 +89,13 @@ separatedListOf separator itemParser state =
 
 pRestList :: String -> Parser a -> Parser [a]
 pRestList separator itemParser =
-    pWhile (terminal separator <&> itemParser ==> foo)
+    many (terminal separator <&> itemParser ==> foo)
         where foo (a, b) = b
 
-pWhile :: Parser a -> Parser [a]
-pWhile parser state =
+many :: Parser a -> Parser [a]
+many parser state =
     case parser state of
-        Left msg             -> Right ([], state)
-        Right (a, nextState) ->
-            case pWhile parser nextState of
-                Right (list, nextState) -> Right (a:list, nextState)
+        Left  msg            -> Right ([], state)
+        Right (v, nextState) ->
+            case many parser nextState of
+                Right (vs, nextState) -> Right (v:vs, nextState)

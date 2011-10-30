@@ -53,8 +53,12 @@ pair          =  space
              ==> (\((((s1, k), s2), _), v) -> Pair s1 k s2 v)
 
 barestring    =  (terminal "\"")
-             <&> (eatChars (['a'..'z'] ++ ['A'..'Z'] ++ "_ ")) 
+             <&> innerstring 
              <&> (terminal "\"")
              ==> (\((_, s), _) -> s)
+
+innerstring   =  (many (escaped <|> unescaped))
+escaped       =  (terminal "\\") <&> (terminal "n") ==> (\(_, c) -> '\n')
+unescaped     =  (anyCharBut "\\\"")
 
 space         =  eatChars " \n"

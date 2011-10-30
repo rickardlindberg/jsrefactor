@@ -31,4 +31,7 @@ printPair (Pair s1 k s2 v) =
     s1 ++ (printString k) ++ s2 ++ ":" ++ (printValue v)
 
 printString v =
-    "\"" ++ v ++ "\""
+    "\"" ++ (concatMap escapeChar v) ++ "\""
+    where
+        escapeChar '\n' = "\\n"
+        escapeChar c    = [c]

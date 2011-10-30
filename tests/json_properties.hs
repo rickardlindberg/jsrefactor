@@ -23,7 +23,7 @@ value size =
                    ]
     where
         whitespace       = listOf (elements " \n")
-        string           = listOf (elements ['a'..'z'])
+        string           = listOf (elements (['a'..'z'] ++ "\n"))
         number           = listOf1 (elements "0123456789")
         emptyInnerArray  = liftM Left whitespace
         emptyInnerObject = liftM Left whitespace
