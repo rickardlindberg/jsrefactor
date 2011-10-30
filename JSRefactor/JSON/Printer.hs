@@ -33,6 +33,12 @@ printPair (Pair s1 k s2 v) =
 printString v =
     "\"" ++ (concatMap escapeChar v) ++ "\""
     where
+        escapeChar '"'  = "\\\""
+        escapeChar '\\' = "\\\\"
+        escapeChar '/'  = "\\/"
+        escapeChar '\b' = "\\b"
+        escapeChar '\f' = "\\f"
         escapeChar '\n' = "\\n"
+        escapeChar '\r' = "\\r"
         escapeChar '\t' = "\\t"
         escapeChar c    = [c]

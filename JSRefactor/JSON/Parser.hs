@@ -59,11 +59,17 @@ barestring    =  (terminal "\"")
 
 innerstring   =  (many (escaped <|> unescaped))
 
-escaped       =  (terminal "\\") <&> (oneCharOf "nt") ==> (\(_, c) -> (unescape c))
+escaped       =  (terminal "\\") <&> (oneCharOf "\"\\/bfnrt") ==> (\(_, c) -> (unescape c))
 
+unescape '"'  = '"'
+unescape '\\' = '\\'
+unescape '/'  = '/'
+unescape 'b'  = '\b'
+unescape 'f'  = '\f'
 unescape 'n'  = '\n'
+unescape 'r'  = '\r'
 unescape 't'  = '\t'
 
-unescaped     =  (anyCharBut "\\\"")
+unescaped     =  (anyCharBut ['"', '\\', '\b', '\f', '\n', '\r', '\t'])
 
 space         =  many (oneCharOf " \n")
