@@ -4,6 +4,7 @@ module JSRefactor.JSON.Printer
     ) where
 
 import Data.List (intercalate)
+import JSRefactor.JavaScript.Printer (printInnerString)
 import JSRefactor.JSON.Parser
 import JSRefactor.JSON.Types
 
@@ -31,14 +32,4 @@ printPair (Pair s1 k s2 v) =
     s1 ++ (printString k) ++ s2 ++ ":" ++ (printValue v)
 
 printString v =
-    "\"" ++ (concatMap escapeChar v) ++ "\""
-    where
-        escapeChar '"'  = "\\\""
-        escapeChar '\\' = "\\\\"
-        escapeChar '/'  = "\\/"
-        escapeChar '\b' = "\\b"
-        escapeChar '\f' = "\\f"
-        escapeChar '\n' = "\\n"
-        escapeChar '\r' = "\\r"
-        escapeChar '\t' = "\\t"
-        escapeChar c    = [c]
+    "\"" ++ (printInnerString v) ++ "\""
