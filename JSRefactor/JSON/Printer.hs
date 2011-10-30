@@ -34,4 +34,5 @@ printString v =
     "\"" ++ (concatMap escapeChar v) ++ "\""
     where
         escapeChar '\n' = "\\n"
+        escapeChar '\t' = "\\t"
         escapeChar c    = [c]

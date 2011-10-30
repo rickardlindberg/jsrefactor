@@ -2,6 +2,7 @@ module JSRefactor.ParseLib
     (
       initialParseState
     , terminal
+    , oneCharOf
     , eatAtLeastOneChars
     , eatChars
     , eof
@@ -38,6 +39,12 @@ anyCharBut string (ParseState (x:xs)) =
     case x `elem` string of
         True  -> Left  ("Did not expect character '" ++ [x] ++ "'")
         False -> Right (x, ParseState xs)
+
+oneCharOf :: String -> Parser Char
+oneCharOf string (ParseState (x:xs)) =
+    case x `elem` string of
+        True  -> Right (x, ParseState xs)
+        False -> Left  ("Did not find one of \"" ++ string ++ "\"")
 
 eatAtLeastOneChars :: [Char] -> Parser String
 eatAtLeastOneChars chars state =

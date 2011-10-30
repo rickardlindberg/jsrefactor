@@ -58,7 +58,13 @@ barestring    =  (terminal "\"")
              ==> (\((_, s), _) -> s)
 
 innerstring   =  (many (escaped <|> unescaped))
-escaped       =  (terminal "\\") <&> (terminal "n") ==> (\(_, c) -> '\n')
+
+escaped       =  (terminal "\\") <&> (oneCharOf "nt") ==> (\(_, c) -> (unescape c))
+
 unescaped     =  (anyCharBut "\\\"")
+
+unescape 'n'  = '\n'
+unescape 't'  = '\t'
+unescape  _   = error "Stupid programmer"
 
 space         =  eatChars " \n"
