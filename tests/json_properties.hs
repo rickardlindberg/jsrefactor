@@ -7,22 +7,30 @@ import Test.QuickCheck
 -- Generators
 
 instance Arbitrary Value where
-    arbitrary =
-        oneof [ liftM3 String whitespace string whitespace
-              , liftM3 Number whitespace number whitespace
-              , liftM3 Array  whitespace (oneof [liftM Left whitespace, liftM Right (listOf1 arbitrary)]) whitespace
-              , liftM3 Object whitespace (oneof [liftM Left whitespace, liftM Right (listOf1 arbitrary)]) whitespace
-              ]
+    arbitrary = sized value
 
-instance Arbitrary Pair where
-    arbitrary =
-        liftM4 Pair whitespace string whitespace arbitrary
-
-whitespace = listOf (elements " \n")
-
-number = listOf1 (elements "0123456789")
-
-string = listOf (elements ['a'..'z'])
+value size =
+    case size of
+        0 -> oneof [ liftM3 String whitespace string           whitespace
+                   , liftM3 Number whitespace number           whitespace
+                   , liftM3 Array  whitespace emptyInnerArray  whitespace
+                   , liftM3 Object whitespace emptyInnerObject whitespace
+                   ]
+        _ -> oneof [ liftM3 String whitespace string           whitespace
+                   , liftM3 Number whitespace number           whitespace
+                   , liftM3 Array  whitespace innerArray       whitespace
+                   , liftM3 Object whitespace innerObject      whitespace
+                   ]
+    where
+        whitespace       = listOf (elements " \n")
+        string           = listOf (elements ['a'..'z'])
+        number           = listOf1 (elements "0123456789")
+        emptyInnerArray  = liftM Left whitespace
+        emptyInnerObject = liftM Left whitespace
+        innerArray       = liftM Right (listOf1 (value newSize))
+        innerObject      = liftM Right (listOf1 pair)
+        pair             = liftM4 Pair whitespace string whitespace (value newSize)
+        newSize          = size `div` 2
 
 -- Properties
 
@@ -40,5 +48,5 @@ prop_printed_and_parsed_is_same_as_original value =
 -- Runner
 
 main = do
-    quickCheckWith (stdArgs { maxSize = 3 }) prop_parsed_and_printed_is_same_as_original
-    quickCheckWith (stdArgs { maxSize = 3 }) prop_printed_and_parsed_is_same_as_original
+    quickCheckWith (stdArgs { maxSize = 5 }) prop_parsed_and_printed_is_same_as_original
+    quickCheckWith (stdArgs { maxSize = 5 }) prop_printed_and_parsed_is_same_as_original
