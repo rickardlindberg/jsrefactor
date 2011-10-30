@@ -19,5 +19,3 @@ unescape 'r'  = '\r'
 unescape 't'  = '\t'
 
 unescaped     =  (anyCharBut ['"', '\\', '\b', '\f', '\n', '\r', '\t'])
-
-space         =  many (oneCharOf " \n")
