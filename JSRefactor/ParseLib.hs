@@ -3,15 +3,14 @@ module JSRefactor.ParseLib
       initialParseState
     , terminal
     , oneCharOf
-    , eatAtLeastOneChars
-    , eatChars
+    , anyCharBut
     , eof
     , (<|>)
     , (<&>)
     , (==>)
     , separatedListOf
+    , atLeastOnce
     , many
-    , anyCharBut
     ) where
 
 import Data.List (stripPrefix)
@@ -30,9 +29,14 @@ terminal string (ParseState input) =
         Nothing        -> Left  ("Did not find expected string \"" ++ string ++ "\"")
         Just restInput -> Right (string, ParseState restInput)
 
-anyChar :: Parser Char
-anyChar (ParseState "")     = Left "Expected char but found EOF"
-anyChar (ParseState (x:xs)) = Right(x, ParseState xs)
+oneCharOf :: String -> Parser Char
+oneCharOf string (ParseState input) =
+    case input of
+        ""     -> Left ("Found EOF instead of one of \"" ++ string ++ "\"")
+        (x:xs) ->
+            case x `elem` string of
+                True  -> Right (x, ParseState xs)
+                False -> Left  ("Did not find one of \"" ++ string ++ "\"")
 
 anyCharBut :: String -> Parser Char
 anyCharBut string (ParseState (x:xs)) =
@@ -40,26 +44,9 @@ anyCharBut string (ParseState (x:xs)) =
         True  -> Left  ("Did not expect character '" ++ [x] ++ "'")
         False -> Right (x, ParseState xs)
 
-oneCharOf :: String -> Parser Char
-oneCharOf string (ParseState (x:xs)) =
-    case x `elem` string of
-        True  -> Right (x, ParseState xs)
-        False -> Left  ("Did not find one of \"" ++ string ++ "\"")
-
-eatAtLeastOneChars :: [Char] -> Parser String
-eatAtLeastOneChars chars state =
-    case eatChars chars state of
-        Right ("", state) -> Left("Expected at least one char")
-        foo               -> foo
-
-eatChars :: [Char] -> Parser String
-eatChars chars (ParseState input) = Right(parsed, ParseState rest)
-    where parsed = takeWhile (\s -> s `elem` chars) input
-          rest   = drop (length parsed) input
-
 eof :: Parser String
 eof (ParseState "") = Right ("", (ParseState ""))
-eof _ = Left "Expected EOF"
+eof _               = Left  "Expected EOF"
 
 (<|>) :: Parser a -> Parser a -> Parser a
 (first <|> second) state =
@@ -98,6 +85,12 @@ pRestList :: String -> Parser a -> Parser [a]
 pRestList separator itemParser =
     many (terminal separator <&> itemParser ==> foo)
         where foo (a, b) = b
+
+atLeastOnce :: Parser a -> Parser [a]
+atLeastOnce parser state =
+    case many parser state of
+        Right ([], _) -> Left "Expected at least one"
+        Right (a, b)  -> Right (a, b)
 
 many :: Parser a -> Parser [a]
 many parser state =

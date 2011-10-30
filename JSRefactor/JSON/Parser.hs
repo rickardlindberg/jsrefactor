@@ -27,7 +27,7 @@ string        =  space
              ==> (\((s1, v), s2) -> String s1 v s2)
 
 number        =  space
-             <&> (eatAtLeastOneChars "1234567890")
+             <&> (atLeastOnce (oneCharOf "1234567890"))
              <&> space
              ==> (\((s1, v), s2) -> Number s1 v s2)
 
@@ -61,10 +61,9 @@ innerstring   =  (many (escaped <|> unescaped))
 
 escaped       =  (terminal "\\") <&> (oneCharOf "nt") ==> (\(_, c) -> (unescape c))
 
-unescaped     =  (anyCharBut "\\\"")
-
 unescape 'n'  = '\n'
 unescape 't'  = '\t'
-unescape  _   = error "Stupid programmer"
 
-space         =  eatChars " \n"
+unescaped     =  (anyCharBut "\\\"")
+
+space         =  many (oneCharOf " \n")
