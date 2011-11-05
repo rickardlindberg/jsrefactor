@@ -4,7 +4,7 @@ module JSRefactor.JSON.Printer
     ) where
 
 import Data.List (intercalate)
-import JSRefactor.JavaScript.Printer (printInnerString)
+import JSRefactor.JS.Printer (printInnerString)
 import JSRefactor.JSON.Parser
 import JSRefactor.JSON.Types
 

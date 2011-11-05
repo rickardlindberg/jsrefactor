@@ -1,7 +1,7 @@
 import Control.Monad
-import JSRefactor.JavaScript.Parser
-import JSRefactor.JavaScript.Printer
-import JSRefactor.JavaScript.Types
+import JSRefactor.JS.Parser
+import JSRefactor.JS.Printer
+import JSRefactor.JS.Types
 import Test.QuickCheck
 
 -- Generators

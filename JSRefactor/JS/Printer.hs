@@ -1,10 +1,10 @@
-module JSRefactor.JavaScript.Printer
+module JSRefactor.JS.Printer
     (
       printValue
     , printInnerString
     ) where
 
-import JSRefactor.JavaScript.Types
+import JSRefactor.JS.Types
 
 printValue :: Value -> String
 

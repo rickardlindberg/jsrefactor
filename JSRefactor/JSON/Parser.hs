@@ -3,7 +3,7 @@ module JSRefactor.JSON.Parser
       parseJSONFile
     ) where
 
-import JSRefactor.JavaScript.Parser (innerstring)
+import JSRefactor.JS.Parser (innerstring)
 import JSRefactor.JSON.Types
 import JSRefactor.ParseLib
 

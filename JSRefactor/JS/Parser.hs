@@ -1,10 +1,10 @@
-module JSRefactor.JavaScript.Parser
+module JSRefactor.JS.Parser
     (
       parseJSFile
     , innerstring
     ) where
 
-import JSRefactor.JavaScript.Types
+import JSRefactor.JS.Types
 import JSRefactor.ParseLib
 
 parseJSFile :: String -> Either String Value

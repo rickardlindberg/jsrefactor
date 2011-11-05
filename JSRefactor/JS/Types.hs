@@ -1,4 +1,4 @@
-module JSRefactor.JavaScript.Types
+module JSRefactor.JS.Types
     (
       Value(..)
     ) where
