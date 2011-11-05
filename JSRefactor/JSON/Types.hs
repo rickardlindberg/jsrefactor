@@ -7,6 +7,7 @@ module JSRefactor.JSON.Types
 data Value = String  WhiteSpace String                      WhiteSpace
            | Number  WhiteSpace Number                      WhiteSpace
            | Boolean WhiteSpace Bool                        WhiteSpace
+           | Null    WhiteSpace                             WhiteSpace
            | Array   WhiteSpace (Either WhiteSpace [Value]) WhiteSpace
            | Object  WhiteSpace (Either WhiteSpace [Pair ]) WhiteSpace
            deriving (Eq, Show)

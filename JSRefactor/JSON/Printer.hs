@@ -22,6 +22,9 @@ printValue (Boolean s1 True s2) =
 printValue (Boolean s1 False s2) =
     s1 ++ "false" ++ s2
 
+printValue (Null s1 s2) =
+    s1 ++ "null" ++ s2
+
 printValue (Array s1 v s2) =
     s1 ++ "[" ++ (printInnerArray v) ++ "]" ++ s2
     where
