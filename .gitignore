@@ -2,3 +2,4 @@
 *.hi
 *.o
 tests/json_properties
+tests/json_reprint
