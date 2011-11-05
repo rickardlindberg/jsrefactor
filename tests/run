@@ -16,6 +16,7 @@ def run_tests():
 def compile_test_programs():
     subprocess.call(["ghc", "--make", "tests/json_properties.hs"])
     subprocess.call(["ghc", "--make", "tests/json_reprint.hs"])
+    subprocess.call(["ghc", "--make", "tests/js_properties.hs"])
 
 def run_json_reprint_test(json_file):
     input_ = open(json_file).read()
@@ -43,6 +44,7 @@ def indent(text):
 
 def run_quickcheck():
     subprocess.call(["tests/json_properties"])
+    subprocess.call(["tests/js_properties"])
 
 if __name__ == "__main__":
     os.chdir(os.path.join(os.path.dirname(__file__), ".."))

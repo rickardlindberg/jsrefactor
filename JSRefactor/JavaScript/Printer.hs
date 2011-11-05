@@ -1,7 +1,14 @@
 module JSRefactor.JavaScript.Printer
     (
-      printInnerString
+      printValue
+    , printInnerString
     ) where
+
+import JSRefactor.JavaScript.Types
+
+printValue :: Value -> String
+
+printValue (Statements v) = v
 
 printInnerString :: String -> String
 printInnerString = concatMap escapeChar

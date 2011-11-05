@@ -3,3 +3,4 @@
 *.o
 tests/json_properties
 tests/json_reprint
+tests/js_properties
