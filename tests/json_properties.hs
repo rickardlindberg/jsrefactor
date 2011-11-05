@@ -11,15 +11,17 @@ instance Arbitrary Value where
 
 value size =
     case size of
-        0 -> oneof [ liftM3 String whitespace string           whitespace
-                   , liftM3 Number whitespace number           whitespace
-                   , liftM3 Array  whitespace emptyInnerArray  whitespace
-                   , liftM3 Object whitespace emptyInnerObject whitespace
+        0 -> oneof [ liftM3 String  whitespace string           whitespace
+                   , liftM3 Number  whitespace number           whitespace
+                   , liftM3 Boolean whitespace arbitrary        whitespace
+                   , liftM3 Array   whitespace emptyInnerArray  whitespace
+                   , liftM3 Object  whitespace emptyInnerObject whitespace
                    ]
-        _ -> oneof [ liftM3 String whitespace string           whitespace
-                   , liftM3 Number whitespace number           whitespace
-                   , liftM3 Array  whitespace innerArray       whitespace
-                   , liftM3 Object whitespace innerObject      whitespace
+        _ -> oneof [ liftM3 String  whitespace string           whitespace
+                   , liftM3 Number  whitespace number           whitespace
+                   , liftM3 Boolean whitespace arbitrary        whitespace
+                   , liftM3 Array   whitespace innerArray       whitespace
+                   , liftM3 Object  whitespace innerObject      whitespace
                    ]
     where
         whitespace       = listOf (elements " \n")

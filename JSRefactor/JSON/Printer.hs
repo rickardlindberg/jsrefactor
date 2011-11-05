@@ -16,6 +16,12 @@ printValue (String s1 v s2) =
 printValue (Number s1 v s2) =
     s1 ++ v ++ s2
 
+printValue (Boolean s1 True s2) =
+    s1 ++ "true" ++ s2
+
+printValue (Boolean s1 False s2) =
+    s1 ++ "false" ++ s2
+
 printValue (Array s1 v s2) =
     s1 ++ "[" ++ (printInnerArray v) ++ "]" ++ s2
     where

@@ -19,6 +19,7 @@ jsonFile      =  value
 
 value         =  string
              <|> number
+             <|> boolean
              <|> array
              <|> object
 
@@ -31,6 +32,11 @@ number        =  space
              <&> (atLeastOnce (oneCharOf "1234567890"))
              <&> space
              ==> (\((s1, v), s2) -> Number s1 v s2)
+
+boolean       =  space
+             <&> (((terminal "true") ==> (\(_) -> True)) <|> ((terminal "false") ==> (\(_) -> False)))
+             <&> space
+             ==> (\((s1, v), s2) -> Boolean s1 v s2)
 
 array         =  space
              <&> (terminal "[")
