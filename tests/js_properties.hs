@@ -14,12 +14,15 @@ value size = liftM2 Value statements whitespace
         statements      = listOf statement
         statement       = oneof [ liftM2 DisruptiveStatement whitespace dStatement
                                 ]
-        dStatement      = oneof [ liftM3 BreakStatement      reqWhitespace label whitespace
-                                , liftM  EmptyBreakStatement whitespace
+        dStatement      = oneof [ liftM3 BreakStatement       reqWhitespace label whitespace
+                                , liftM  EmptyBreakStatement  whitespace
+                                , liftM2 ReturnStatement      reqWhitespace expression
+                                , liftM  EmptyReturnStatement whitespace
                                 ]
         whitespace      = listOf  oneWhitespace
         reqWhitespace   = listOf1 oneWhitespace
         oneWhitespace   = elements " \n"
+        expression      = return "1"
         label           = return "abc"
         newSize         = size `div` 2
 

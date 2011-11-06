@@ -15,11 +15,12 @@ printValue (Value statements whitespace) =
 printStatement (DisruptiveStatement s disruptive) =
     s ++ (printDisruptiveStatement disruptive)
 
-printDisruptiveStatement (BreakStatement s1 label s2) =
-    "break" ++ s1 ++ label ++ s2 ++ ";"
+printDisruptiveStatement (BreakStatement s1 label s2) = "break" ++ s1 ++ label ++ s2 ++ ";"
+printDisruptiveStatement (EmptyBreakStatement s)      = "break" ++ s ++ ";"
+printDisruptiveStatement (ReturnStatement s e)        = "return" ++ s ++ (printExpression e) ++ ";"
+printDisruptiveStatement (EmptyReturnStatement s)     = "return" ++ s ++ ";"
 
-printDisruptiveStatement (EmptyBreakStatement s) =
-    "break" ++ s ++ ";"
+printExpression s = s
 
 printInnerString :: String -> String
 printInnerString = concatMap escapeChar
