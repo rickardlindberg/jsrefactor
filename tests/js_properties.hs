@@ -9,26 +9,25 @@ import Test.QuickCheck
 instance Arbitrary Value where
     arbitrary = sized value
 
-value size =
-    case size of
-        _ -> oneof [ liftM2 Value statements whitespace
-                   ]
+value size = liftM2 Value statements whitespace
     where
-        statements       = listOf statement
-        statement        = oneof [ liftM2 DisruptiveStatement whitespace dStatement
-                                 ]
-        dStatement       = oneof [ liftM3 BreakStatement whitespaceC (return "abc") whitespace
-                                 , liftM  EmptyBreakStatement whitespace
-                                 ]
-        whitespace       = listOf (elements " \n")
-        whitespaceC      = listOf1 (elements " \n")
-        newSize          = size `div` 2
+        statements      = listOf statement
+        statement       = oneof [ liftM2 DisruptiveStatement whitespace dStatement
+                                ]
+        dStatement      = oneof [ liftM3 BreakStatement      reqWhitespace label whitespace
+                                , liftM  EmptyBreakStatement whitespace
+                                ]
+        whitespace      = listOf  oneWhitespace
+        reqWhitespace   = listOf1 oneWhitespace
+        oneWhitespace   = elements " \n"
+        label           = return "abc"
+        newSize         = size `div` 2
 
 -- Properties
 
 prop_parsed_and_printed_is_same_as_original value =
-    whenFail (putStr (printValue value)) $
     let originalString = printValue value in
+        whenFail (putStr ("\nString: " ++ originalString ++ "Back: " ++ (show (parseJSFile originalString)))) $
         case parseJSFile originalString of
             Left  _      -> False
             Right value' -> (printValue value') == originalString

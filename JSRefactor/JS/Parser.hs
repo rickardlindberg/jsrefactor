@@ -13,48 +13,43 @@ parseJSFile input =
         Left  errorMessage -> Left  errorMessage
         Right (value, _)   -> Right value
 
-jsFile        =  (many statement)
-             <&> whitespace
-             <&> eof
-             ==> (\((vs, s), _) -> Value vs s)
+jsFile           =  many statement
+                <&> whitespace
+                <&> eof
+                ==> (\((vs, s), _) -> Value vs s)
 
-statement     =  whitespace
-             <&> dStatement
-             ==> (\(s, ds) -> DisruptiveStatement s ds)
+statement        =  disruptiveStmt
 
-dStatement    =  breakSt
+disruptiveStmt   =  whitespace
+                <&> (breakStmt <|> emptyBreakStmt)
+                ==> (\(s, ds) -> DisruptiveStatement s ds)
 
-breakSt       =  (terminal "break")
-             <&> (breakStLabel <|> breakStEmpty)
-             ==> (\(_, v) -> v)
+breakStmt        =  terminal "break"
+                <&> reqWhitespace
+                <&> name
+                <&> whitespace
+                <&> terminal ";"
+                ==> (\((((_, s1), n), s2), _) -> BreakStatement s1 n s2)
 
-breakStLabel  =  (atLeastOnce whitespaceC)
-             <&> name
-             <&> whitespace
-             <&> (terminal ";")
-             ==> (\(((s1, v), s2), _) -> BreakStatement s1 v s2)
+emptyBreakStmt   =  terminal "break"
+                <&> whitespace
+                <&> terminal ";"
+                ==> (\((_, s), _) -> EmptyBreakStatement s)
 
-breakStEmpty  =  whitespace
-             <&> (terminal ";")
-             ==> (\(s, _) -> EmptyBreakStatement s)
+name             =  atLeastOnce $ oneCharOf $ ['a'..'z'] ++ ['A'..'Z']
 
-name          =  (atLeastOnce (oneCharOf "abc"))
+innerstring      =  many (escaped <|> unescaped)
+escaped          =  (terminal "\\") <&> (oneCharOf "\"\\/bfnrt") ==> (\(_, c) -> (unescape c))
+unescape '"'     =  '"'
+unescape '\\'    =  '\\'
+unescape '/'     =  '/'
+unescape 'b'     =  '\b'
+unescape 'f'     =  '\f'
+unescape 'n'     =  '\n'
+unescape 'r'     =  '\r'
+unescape 't'     =  '\t'
+unescaped        =  anyCharBut ['"', '\\', '\b', '\f', '\n', '\r', '\t']
 
-innerstring   =  (many (escaped <|> unescaped))
-
-escaped       =  (terminal "\\") <&> (oneCharOf "\"\\/bfnrt") ==> (\(_, c) -> (unescape c))
-
-unescape '"'  = '"'
-unescape '\\' = '\\'
-unescape '/'  = '/'
-unescape 'b'  = '\b'
-unescape 'f'  = '\f'
-unescape 'n'  = '\n'
-unescape 'r'  = '\r'
-unescape 't'  = '\t'
-
-unescaped     =  (anyCharBut ['"', '\\', '\b', '\f', '\n', '\r', '\t'])
-
-whitespace    =  many whitespaceC
-
-whitespaceC   =  (oneCharOf " \n")
+whitespace       =  many        oneWhitespace
+reqWhitespace    =  atLeastOnce oneWhitespace
+oneWhitespace    =  oneCharOf [' ', '\n']
