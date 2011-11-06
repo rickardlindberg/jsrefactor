@@ -5,6 +5,7 @@ module JSRefactor.ParseLib
     , oneCharOf
     , anyCharBut
     , eof
+    , constant
     , (<|>)
     , (<&>)
     , (==>)
@@ -47,6 +48,9 @@ anyCharBut string (ParseState (x:xs)) =
 eof :: Parser String
 eof (ParseState "") = Right ("", (ParseState ""))
 eof _               = Left  "Expected EOF"
+
+constant :: a -> Parser a
+constant value parseState = Right (value, parseState)
 
 (<|>) :: Parser a -> Parser a -> Parser a
 (first <|> second) state =

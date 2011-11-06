@@ -5,10 +5,21 @@ module JSRefactor.JS.Printer
     ) where
 
 import JSRefactor.JS.Types
+import Data.List (intercalate)
 
 printValue :: Value -> String
 
-printValue (Statements v) = v
+printValue (Value statements whitespace) =
+    (intercalate "" (map printStatement statements)) ++ whitespace
+
+printStatement (DisruptiveStatement s disruptive) =
+    s ++ (printDisruptiveStatement disruptive)
+
+printDisruptiveStatement (BreakStatement s1 label s2) =
+    "break" ++ s1 ++ label ++ s2 ++ ";"
+
+printDisruptiveStatement (EmptyBreakStatement s) =
+    "break" ++ s ++ ";"
 
 printInnerString :: String -> String
 printInnerString = concatMap escapeChar
