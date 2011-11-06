@@ -17,7 +17,7 @@ data DisruptiveStatement =
     | EmptyBreakStatement  WhiteSpace
     | ReturnStatement      WhiteSpace Expression
     | EmptyReturnStatement WhiteSpace
-    | ThrowStatement       WhiteSpace Expression WhiteSpace
+    | ThrowStatement       WhiteSpace Expression
     deriving (Eq, Show)
 
 type Expression = String

@@ -19,6 +19,7 @@ printDisruptiveStatement (BreakStatement s1 label s2) = "break" ++ s1 ++ label +
 printDisruptiveStatement (EmptyBreakStatement s)      = "break" ++ s ++ ";"
 printDisruptiveStatement (ReturnStatement s e)        = "return" ++ s ++ (printExpression e) ++ ";"
 printDisruptiveStatement (EmptyReturnStatement s)     = "return" ++ s ++ ";"
+printDisruptiveStatement (ThrowStatement s e)         = "throw" ++ s ++ (printExpression e) ++ ";"
 
 printExpression s = s
 

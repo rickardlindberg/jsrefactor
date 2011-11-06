@@ -18,6 +18,7 @@ value size = liftM2 Value statements whitespace
                                 , liftM  EmptyBreakStatement  whitespace
                                 , liftM2 ReturnStatement      reqWhitespace expression
                                 , liftM  EmptyReturnStatement whitespace
+                                , liftM2 ThrowStatement       reqWhitespace expression
                                 ]
         whitespace      = listOf  oneWhitespace
         reqWhitespace   = listOf1 oneWhitespace

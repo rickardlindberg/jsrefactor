@@ -21,8 +21,10 @@ jsFile           =  many statement
 statement        =  disruptiveStmt
 
 disruptiveStmt   =  whitespace
-                <&> (breakStmt <|> emptyBreakStmt <|> returnStmt <|> emptyReturnStmt)
-                ==> (\(s, ds) -> DisruptiveStatement s ds)
+                <&> (breakStmt <|> emptyBreakStmt <|>
+                     returnStmt <|> emptyReturnStmt <|>
+                     throwStmt)
+                ==> (\(s, d) -> DisruptiveStatement s d)
 
 breakStmt        =  terminal "break"
                 <&> reqWhitespace
@@ -40,14 +42,20 @@ returnStmt       =  terminal "return"
                 <&> reqWhitespace
                 <&> expression
                 <&> terminal ";"
-                ==> (\(((_, s1), e), _) -> ReturnStatement s1 e)
-
-expression       =  atLeastOnce $ oneCharOf "1"
+                ==> (\(((_, s), e), _) -> ReturnStatement s e)
 
 emptyReturnStmt  =  terminal "return"
                 <&> whitespace
                 <&> terminal ";"
                 ==> (\((_, s), _) -> EmptyReturnStatement s)
+
+throwStmt        =  terminal "throw"
+                <&> reqWhitespace
+                <&> expression
+                <&> terminal ";"
+                ==> (\(((_, s), e), _) -> ThrowStatement s e)
+
+expression       =  atLeastOnce $ oneCharOf "1"
 
 name             =  atLeastOnce $ oneCharOf $ ['a'..'z'] ++ ['A'..'Z']
 
