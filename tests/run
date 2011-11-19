@@ -6,47 +6,21 @@ import os.path
 import subprocess
 import sys
 
+TESTS = [
+    "tests/JSONUnit",
+    "tests/JSONProperties",
+    "tests/JSProperties",
+]
+
 def run_tests():
-    compile_test_programs()
-    for json_file in glob.glob("tests/data/*.json"):
-        run_json_reprint_test(json_file)
-    for json_file in glob.glob("tests/invalid_data/*.json"):
-        run_json_invalid(json_file)
-    run_quickcheck()
-
-def compile_test_programs():
-    exit_if_unsuccessful(["ghc", "--make", "tests/json_properties.hs"])
-    exit_if_unsuccessful(["ghc", "--make", "tests/json_reprint.hs"])
-    exit_if_unsuccessful(["ghc", "--make", "tests/json_print_status.hs"])
-    exit_if_unsuccessful(["ghc", "--make", "tests/js_properties.hs"])
-
-def run_json_reprint_test(json_file):
-    input_ = open(json_file).read()
-    (output, returncode) = run(["tests/json_reprint"], input_)
-    if returncode == 0 and output == input_:
-        print "json_reprint %s: OK" % json_file
-    else:
-        print "json_reprint %s: FAIL, GOT:\n%s" % (json_file, indent(output))
-
-def run_json_invalid(json_file):
-    input_ = open(json_file).read()
-    (output, returncode) = run(["tests/json_print_status"], input_)
-    if returncode == 0 and output.startswith("FAILURE"):
-        print "json_reprint %s: OK" % json_file
-    else:
-        print "json_reprint %s: FAIL, GOT:\n%s" % (json_file, indent(output))
-
-def run(command, input_):
-    process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    (output, err) = process.communicate(input_)
-    return (output, process.returncode)
-
-def indent(text):
-    return "\n".join("    " + x for x in text.split("\n"))
-
-def run_quickcheck():
-    exit_if_unsuccessful(["tests/json_properties"])
-    exit_if_unsuccessful(["tests/js_properties"])
+    print "=> COMPILING"
+    for test in TESTS:
+        exit_if_unsuccessful(["ghc", "--make", "%s.hs" % test])
+    print
+    print "=> RUNNING"
+    for test in TESTS:
+        print "==> %s" % test
+        exit_if_unsuccessful([test])
 
 def exit_if_unsuccessful(cmd):
     if subprocess.call(cmd) != 0:
