@@ -28,7 +28,9 @@ value size =
     where
         whitespace       = listOf (elements " \n")
         string           = listOf (elements (['a'..'z'] ++ ['"', '\\', '/', '\b', '\f', '\n', '\r', '\t']))
-        number           = listOf1 (elements "0123456789")
+        number           = liftM2 (++) sign base
+        base             = listOf1 (elements "0123456789")
+        sign             = oneof [return "", return "-"]
         emptyInnerArray  = liftM Left whitespace
         emptyInnerObject = liftM Left whitespace
         innerArray       = liftM Right (listOf1 (value newSize))
