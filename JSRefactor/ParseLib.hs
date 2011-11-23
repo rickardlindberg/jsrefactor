@@ -116,3 +116,10 @@ many parser = P $ \state ->
         Right (v, nextState) ->
             case runParser (many parser) nextState of
                 Right (vs, nextState) -> Right (v:vs, nextState)
+
+instance Monad Parser where
+    return = constant
+    first >>= f = P $ \state ->
+        case runParser first state of
+            Left msg                  -> Left msg
+            Right (product, newState) -> runParser (f product) newState
