@@ -1,6 +1,7 @@
 module JSRefactor.ParseLib
     (
-      initialParseState
+      runParser
+    , initialParseState
     , terminal
     , oneCharOf
     , anyCharBut
@@ -17,22 +18,25 @@ module JSRefactor.ParseLib
 
 import Data.List (stripPrefix)
 
-type Parser a = ParseState -> (Either String (a, ParseState))
+newtype Parser a = P (ParseState -> (Either String (a, ParseState)))
 
 data ParseState = ParseState {
     input :: String
 }
 
+runParser :: Parser a -> ParseState -> (Either String (a, ParseState))
+runParser (P f) = f
+
 initialParseState input = ParseState input
 
 terminal :: String -> Parser String
-terminal string (ParseState input) =
+terminal string = P $ \(ParseState input) ->
     case string `stripPrefix` input of
         Nothing        -> Left  ("Did not find expected string \"" ++ string ++ "\"")
         Just restInput -> Right (string, ParseState restInput)
 
 oneCharOf :: String -> Parser Char
-oneCharOf string (ParseState input) =
+oneCharOf string = P $ \(ParseState input) ->
     case input of
         ""     -> Left ("Found EOF instead of one of \"" ++ string ++ "\"")
         (x:xs) ->
@@ -41,26 +45,28 @@ oneCharOf string (ParseState input) =
                 False -> Left  ("Did not find one of \"" ++ string ++ "\"")
 
 anyCharBut :: String -> Parser Char
-anyCharBut string (ParseState (x:xs)) =
+anyCharBut string = P $ \(ParseState (x:xs)) ->
     case x `elem` string of
         True  -> Left  ("Did not expect character '" ++ [x] ++ "'")
         False -> Right (x, ParseState xs)
 
 eof :: Parser String
-eof (ParseState "") = Right ("", (ParseState ""))
-eof _               = Left  "Expected EOF"
+eof = P $ \state ->
+          case state of
+             (ParseState "") -> Right ("", (ParseState ""))
+             _               -> Left  "Expected EOF"
 
 constant :: a -> Parser a
-constant value parseState = Right (value, parseState)
+constant value = P $ \parseState -> Right (value, parseState)
 
 optional :: a -> Parser a -> Parser a
-optional defaultValue p state =
+optional defaultValue (P p) = P $ \state ->
     case p state of
         Left _                    -> Right (defaultValue, state)
         Right (product, newState) -> Right (product, newState)
 
 (<|>) :: Parser a -> Parser a -> Parser a
-(first <|> second) state =
+(P first) <|> (P second) = P $ \state ->
     case first state of
         Left  (a)    ->
             case second state of
@@ -69,7 +75,7 @@ optional defaultValue p state =
         Right (a, b) -> Right (a, b)
 
 (<&>) :: Parser a -> Parser b -> Parser (a, b)
-(first <&> second) state =
+(P first) <&> (P second) = P $ \state ->
     case first state of
         Left (msg)               -> Left (msg)
         Right (aValue, newState) ->
@@ -78,17 +84,17 @@ optional defaultValue p state =
                 Right (bValue, newState) -> Right ((aValue, bValue), newState)
 
 (==>) :: Parser a -> (a -> b) -> Parser b
-(parser ==> predicate) state =
+(P parser) ==> predicate = P $ \state ->
     case parser state of
         Left (msg)          -> Left (msg)
         Right (a, newState) -> Right(predicate a, newState)
 
 separatedListOf :: String -> Parser a -> Parser [a]
-separatedListOf separator itemParser state =
+separatedListOf separator (P itemParser) = P $ \state ->
     case itemParser state of
         Left _                  -> Left ("No items in list")
         Right (item, nextState) ->
-            case pRestList separator itemParser nextState of
+             case runParser (pRestList separator (P itemParser)) nextState of
                 Left msg -> Left msg
                 Right (items, nextState) -> Right (item:items, nextState)
 
@@ -98,15 +104,15 @@ pRestList separator itemParser =
         where foo (a, b) = b
 
 atLeastOnce :: Parser a -> Parser [a]
-atLeastOnce parser state =
-    case many parser state of
+atLeastOnce parser = P $ \state ->
+    case runParser (many parser) state of
         Right ([], _) -> Left "Expected at least one"
         Right (a, b)  -> Right (a, b)
 
 many :: Parser a -> Parser [a]
-many parser state =
-    case parser state of
+many parser = P $ \state ->
+    case runParser parser state of
         Left  msg            -> Right ([], state)
         Right (v, nextState) ->
-            case many parser nextState of
+            case runParser (many parser) nextState of
                 Right (vs, nextState) -> Right (v:vs, nextState)

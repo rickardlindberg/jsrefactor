@@ -9,7 +9,7 @@ import JSRefactor.ParseLib
 
 parseJSONFile :: String -> Either String Value
 parseJSONFile input =
-    case jsonFile (initialParseState input) of
+    case runParser jsonFile (initialParseState input) of
         Left  errorMessage -> Left  errorMessage
         Right (value, _)   -> Right value
 

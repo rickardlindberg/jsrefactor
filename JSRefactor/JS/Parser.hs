@@ -9,7 +9,7 @@ import JSRefactor.ParseLib
 
 parseJSFile :: String -> Either String Value
 parseJSFile input =
-    case jsFile (initialParseState input) of
+    case runParser jsFile (initialParseState input) of
         Left  errorMessage -> Left  errorMessage
         Right (value, _)   -> Right value
 
