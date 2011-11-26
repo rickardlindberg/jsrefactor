@@ -18,14 +18,13 @@ module JSRefactor.ParseLib
 
 import Data.List (stripPrefix)
 
-newtype Parser a = P (ParseState -> (Either String (a, ParseState)))
+newtype Parser a = P {
+    runParser :: ParseState -> Either String (a, ParseState)
+}
 
 data ParseState = ParseState {
     input :: String
 }
-
-runParser :: Parser a -> ParseState -> (Either String (a, ParseState))
-runParser (P f) = f
 
 initialParseState input = ParseState input
 
