@@ -29,11 +29,12 @@ string        =  space
              <&> space
              ==> (\((s1, v), s2) -> String s1 v s2)
 
-number        =  space
-             <&> (optional "" $ terminal "-")
-             <&> (atLeastOnce $ oneCharOf "1234567890")
-             <&> space
-             ==> (\(((s1, sign), v), s2) -> Number s1 (sign ++ v) s2)
+number = do
+    s1        <- space
+    sign      <- (optional "" $ terminal "-")
+    v         <- (atLeastOnce $ oneCharOf "1234567890")
+    s2        <- space
+    return    $  Number s1 (sign ++ v) s2
 
 boolean       =  space
              <&> (((terminal "true") ==> (\(_) -> True)) <|> ((terminal "false") ==> (\(_) -> False)))
