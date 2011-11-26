@@ -6,7 +6,6 @@ module JSRefactor.ParseLib
     , oneCharOf
     , anyCharBut
     , eof
-    , constant
     , optional
     , (<|>)
     , (<&>)
@@ -54,9 +53,6 @@ eof = Parser $ \state ->
           case state of
              (ParseState "") -> Right ("", (ParseState ""))
              _               -> Left  "Expected EOF"
-
-constant :: a -> Parser a
-constant value = Parser $ \parseState -> Right (value, parseState)
 
 optional :: a -> Parser a -> Parser a
 optional defaultValue (Parser p) = Parser $ \state ->
@@ -117,8 +113,8 @@ many parser = Parser $ \state ->
                 Right (vs, nextState) -> Right (v:vs, nextState)
 
 instance Monad Parser where
-    return = constant
-    first >>= f = Parser $ \state ->
+    return value = Parser $ \parseState -> Right (value, parseState)
+    first >>= f  = Parser $ \state ->
         case runParser first state of
             Left msg                  -> Left msg
             Right (product, newState) -> runParser (f product) newState
