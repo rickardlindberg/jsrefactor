@@ -20,11 +20,10 @@ jsFile           =  many statement
 
 statement        =  disruptiveStmt
 
-disruptiveStmt   =  whitespace
-                <&> (breakStmt <|>
-                     returnStmt <|> emptyReturnStmt <|>
-                     throwStmt)
-                ==> (\(s, d) -> DisruptiveStatement s d)
+disruptiveStmt = do
+    s      <- whitespace
+    d      <- (breakStmt <|> returnStmt <|> throwStmt)
+    return $  DisruptiveStatement s d
 
 breakStmt =
     (labeledBreakStmt <|> emptyBreakStmt) ==> BreakStatement
@@ -43,16 +42,21 @@ emptyBreakStmt = do
     _      <- (terminal ";")
     return $  EmptyBreakStatement s
 
-returnStmt       =  terminal "return"
-                <&> reqWhitespace
-                <&> expression
-                <&> terminal ";"
-                ==> (\(((_, s), e), _) -> ReturnStatement s e)
+returnStmt =
+    (exprReturnStmt <|> emptyReturnStmt) ==> ReturnStatement
 
-emptyReturnStmt  =  terminal "return"
-                <&> whitespace
-                <&> terminal ";"
-                ==> (\((_, s), _) -> EmptyReturnStatement s)
+exprReturnStmt = do
+    _      <- terminal "return"
+    s      <- reqWhitespace
+    e      <- expression
+    _      <- terminal ";"
+    return $  ExpressionReturnStatement s e
+
+emptyReturnStmt = do
+    _      <- terminal "return"
+    s      <- whitespace
+    _      <- terminal ";"
+    return $  EmptyReturnStatement s
 
 throwStmt        =  terminal "throw"
                 <&> reqWhitespace

@@ -4,6 +4,7 @@ module JSRefactor.JS.Types
     , Statement(..)
     , DisruptiveStatement(..)
     , BreakStatement(..)
+    , ReturnStatement(..)
     ) where
 
 data Value =
@@ -23,14 +24,18 @@ data Statement =
 
 data DisruptiveStatement =
       BreakStatement       BreakStatement
-    | ReturnStatement      WhiteSpace Expression
-    | EmptyReturnStatement WhiteSpace
+    | ReturnStatement      ReturnStatement
     | ThrowStatement       WhiteSpace Expression
     deriving (Eq, Show)
 
 data BreakStatement =
       EmptyBreakStatement   WhiteSpace
     | LabeledBreadStatement WhiteSpace String WhiteSpace
+    deriving (Eq, Show)
+
+data ReturnStatement =
+      ExpressionReturnStatement WhiteSpace Expression
+    | EmptyReturnStatement      WhiteSpace
     deriving (Eq, Show)
 
 type Expression = String
