@@ -17,15 +17,17 @@ pStmt (DisruptiveStatement disruptive) = pDisruptiveStmt disruptive
 
 pDisruptiveStmt (BreakStatement b)       = pBreakStmt b
 pDisruptiveStmt (ReturnStatement r)      = pReturnStmt r
-pDisruptiveStmt (ThrowStatement s1 e s2) = "throw" ++ s1 ++ (printExpression e) ++ s2 ++ ";"
+pDisruptiveStmt (ThrowStatement s1 e s2) = "throw" ++ s1 ++ (pExp e) ++ s2 ++ ";"
 
 pBreakStmt (LabeledBreadStatement s1 label s2) = "break" ++ s1 ++ label ++ s2 ++ ";"
 pBreakStmt (EmptyBreakStatement s)             = "break" ++ s ++ ";"
 
-pReturnStmt (ExpressionReturnStatement s1 e s2) = "return" ++ s1 ++ (printExpression e) ++ s2 ++ ";"
+pReturnStmt (ExpressionReturnStatement s1 e s2) = "return" ++ s1 ++ (pExp e) ++ s2 ++ ";"
 pReturnStmt (EmptyReturnStatement s)            = "return" ++ s ++ ";"
 
-printExpression s = s
+pExp (LiteralExpression s) = pLiteralExp s
+
+pLiteralExp (NumberLiteral s) = s
 
 printInnerString :: String -> String
 printInnerString = concatMap escapeChar

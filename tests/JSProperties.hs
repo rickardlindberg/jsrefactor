@@ -26,7 +26,11 @@ value size = liftM Value stmts
         returnStmt      = oneof [ liftM3 ExpressionReturnStatement reqWhitespace expression whitespace
                                 , liftM  EmptyReturnStatement      whitespace
                                 ]
-        expression      = return "1"
+        expression      = oneof [ liftM  LiteralExpression literal
+                                ]
+        literal         = oneof [ liftM  NumberLiteral number
+                                ]
+        number          = return "1"
         whitespace      = listOf  oneWhitespace
         reqWhitespace   = listOf1 oneWhitespace
         oneWhitespace   = elements " \n"

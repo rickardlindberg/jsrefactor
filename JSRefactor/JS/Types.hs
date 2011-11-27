@@ -6,6 +6,8 @@ module JSRefactor.JS.Types
     , DisruptiveStatement(..)
     , BreakStatement(..)
     , ReturnStatement(..)
+    , Expression(..)
+    , Literal(..)
     ) where
 
 data Value =
@@ -44,6 +46,26 @@ data ReturnStatement =
     | EmptyReturnStatement      WhiteSpace
     deriving (Eq, Show)
 
-type Expression = String
+data Expression =
+    LiteralExpression Literal
+    -- name
+    -- paren expression
+    -- prefix expression
+    -- infix expression
+    -- ?: expression
+    -- invocation
+    -- refinement
+    -- new
+    -- delete
+    deriving (Eq, Show)
+
+data Literal =
+    NumberLiteral String
+    -- string
+    -- object
+    -- array
+    -- function
+    -- regexp
+    deriving (Eq, Show)
 
 type WhiteSpace = String

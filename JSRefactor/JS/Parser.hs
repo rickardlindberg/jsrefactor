@@ -78,7 +78,17 @@ throwStmt = do
     _      <- terminal ";"
     return $  ThrowStatement s1 e s2
 
-expression       =  atLeastOnce $ oneCharOf "1"
+expression =
+    literalExp
+
+literalExp =
+    literal ==> LiteralExpression
+
+literal =
+    numberLiteral
+
+numberLiteral =
+    (atLeastOnce $ oneCharOf "1") ==> NumberLiteral
 
 name             =  atLeastOnce $ oneCharOf $ ['a'..'z'] ++ ['A'..'Z']
 
