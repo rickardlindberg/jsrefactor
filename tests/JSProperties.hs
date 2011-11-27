@@ -30,7 +30,12 @@ value size = liftM Value stmts
                                 ]
         literal         = oneof [ liftM  NumberLiteral number
                                 ]
-        number          = return "1"
+        number          = integer
+        integer         = oneof [ return "0"
+                                , liftM2 (:) nonZeroDigit (listOf digit)
+                                ]
+        nonZeroDigit    = elements "123456789"
+        digit           = elements "1234567890"
         whitespace      = listOf  oneWhitespace
         reqWhitespace   = listOf1 oneWhitespace
         oneWhitespace   = elements " \n"

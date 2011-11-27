@@ -88,7 +88,15 @@ literal =
     numberLiteral
 
 numberLiteral =
-    (atLeastOnce $ oneCharOf "1") ==> NumberLiteral
+    integer ==> NumberLiteral
+
+integer =
+    (terminal "0") <|> nonZeroInteger
+
+nonZeroInteger = do
+    first  <- (       oneCharOf "123456789")
+    rest   <- (many $ oneCharOf "1234567890")
+    return $  first:rest
 
 name             =  atLeastOnce $ oneCharOf $ ['a'..'z'] ++ ['A'..'Z']
 
