@@ -87,16 +87,26 @@ literalExp =
 literal =
     numberLiteral
 
-numberLiteral =
-    integer ==> NumberLiteral
+numberLiteral = do
+    i      <- integer
+    f      <- (fraction <|> constant "")
+    return $  NumberLiteral (i ++ f)
 
 integer =
     (terminal "0") <|> nonZeroInteger
 
 nonZeroInteger = do
-    first  <- (       oneCharOf "123456789")
-    rest   <- (many $ oneCharOf "1234567890")
+    first  <- nonZeroDigit
+    rest   <- (many digit)
     return $  first:rest
+
+fraction = do
+    dot    <- (terminal ".")
+    digits <- (many digit)
+    return $  dot ++ digits
+
+digit            = oneCharOf "1234567890"
+nonZeroDigit     = oneCharOf "123456789"
 
 name             =  atLeastOnce $ oneCharOf $ ['a'..'z'] ++ ['A'..'Z']
 

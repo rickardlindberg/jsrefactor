@@ -30,9 +30,12 @@ value size = liftM Value stmts
                                 ]
         literal         = oneof [ liftM  NumberLiteral number
                                 ]
-        number          = integer
+        number          = liftM2 (++) integer fraction
         integer         = oneof [ return "0"
                                 , liftM2 (:) nonZeroDigit (listOf digit)
+                                ]
+        fraction        = oneof [ return ""
+                                , liftM2 (++) (return ".") (listOf digit)
                                 ]
         nonZeroDigit    = elements "123456789"
         digit           = elements "1234567890"
