@@ -14,11 +14,13 @@ value size = liftM2 Value statements whitespace
         statements      = listOf statement
         statement       = oneof [ liftM2 DisruptiveStatement whitespace dStatement
                                 ]
-        dStatement      = oneof [ liftM3 BreakStatement       reqWhitespace label whitespace
-                                , liftM  EmptyBreakStatement  whitespace
+        dStatement      = oneof [ liftM  BreakStatement       breakStmt
                                 , liftM2 ReturnStatement      reqWhitespace expression
                                 , liftM  EmptyReturnStatement whitespace
                                 , liftM2 ThrowStatement       reqWhitespace expression
+                                ]
+        breakStmt       = oneof [ liftM3 LabeledBreadStatement reqWhitespace label whitespace
+                                , liftM  EmptyBreakStatement   whitespace
                                 ]
         whitespace      = listOf  oneWhitespace
         reqWhitespace   = listOf1 oneWhitespace

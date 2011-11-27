@@ -21,22 +21,27 @@ jsFile           =  many statement
 statement        =  disruptiveStmt
 
 disruptiveStmt   =  whitespace
-                <&> (breakStmt <|> emptyBreakStmt <|>
+                <&> (breakStmt <|>
                      returnStmt <|> emptyReturnStmt <|>
                      throwStmt)
                 ==> (\(s, d) -> DisruptiveStatement s d)
 
-breakStmt        =  terminal "break"
-                <&> reqWhitespace
-                <&> name
-                <&> whitespace
-                <&> terminal ";"
-                ==> (\((((_, s1), n), s2), _) -> BreakStatement s1 n s2)
+breakStmt =
+    (labeledBreakStmt <|> emptyBreakStmt) ==> BreakStatement
 
-emptyBreakStmt   =  terminal "break"
-                <&> whitespace
-                <&> terminal ";"
-                ==> (\((_, s), _) -> EmptyBreakStatement s)
+labeledBreakStmt = do
+    _      <- (terminal "break")
+    s1     <- reqWhitespace
+    n      <- name
+    s2     <- whitespace
+    _      <- (terminal ";")
+    return $  LabeledBreadStatement s1 n s2
+
+emptyBreakStmt = do
+    _      <- (terminal "break")
+    s      <- whitespace
+    _      <- (terminal ";")
+    return $  EmptyBreakStatement s
 
 returnStmt       =  terminal "return"
                 <&> reqWhitespace

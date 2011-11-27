@@ -10,16 +10,17 @@ import Data.List (intercalate)
 printValue :: Value -> String
 
 printValue (Value statements whitespace) =
-    (intercalate "" (map printStatement statements)) ++ whitespace
+    (intercalate "" (map pStmt statements)) ++ whitespace
 
-printStatement (DisruptiveStatement s disruptive) =
-    s ++ (printDisruptiveStatement disruptive)
+pStmt (DisruptiveStatement s disruptive) = s ++ (pDisruptiveStmt disruptive)
 
-printDisruptiveStatement (BreakStatement s1 label s2) = "break" ++ s1 ++ label ++ s2 ++ ";"
-printDisruptiveStatement (EmptyBreakStatement s)      = "break" ++ s ++ ";"
-printDisruptiveStatement (ReturnStatement s e)        = "return" ++ s ++ (printExpression e) ++ ";"
-printDisruptiveStatement (EmptyReturnStatement s)     = "return" ++ s ++ ";"
-printDisruptiveStatement (ThrowStatement s e)         = "throw" ++ s ++ (printExpression e) ++ ";"
+pDisruptiveStmt (BreakStatement breakStmt) = pBreakStmt breakStmt
+pDisruptiveStmt (ReturnStatement s e)      = "return" ++ s ++ (printExpression e) ++ ";"
+pDisruptiveStmt (EmptyReturnStatement s)   = "return" ++ s ++ ";"
+pDisruptiveStmt (ThrowStatement s e)       = "throw" ++ s ++ (printExpression e) ++ ";"
+
+pBreakStmt (LabeledBreadStatement s1 label s2) = "break" ++ s1 ++ label ++ s2 ++ ";"
+pBreakStmt (EmptyBreakStatement s)             = "break" ++ s ++ ";"
 
 printExpression s = s
 
