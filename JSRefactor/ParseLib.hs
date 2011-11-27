@@ -55,7 +55,7 @@ eof :: Parser String
 eof = Parser $ \state ->
           case state of
              (ParseState "") -> Right ("", (ParseState ""))
-             _               -> Left  "Expected EOF"
+             (ParseState s)  -> Left  ("Expected EOF, but found: " ++ s)
 
 (<|>) :: Parser a -> Parser a -> Parser a
 (Parser first) <|> (Parser second) = Parser $ \state ->
