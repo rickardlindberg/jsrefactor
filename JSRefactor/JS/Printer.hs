@@ -28,16 +28,20 @@ pReturnStmt (EmptyReturnStatement s)            = "return" ++ s ++ ";"
 pExp (LiteralExpression s) = pLiteralExp s
 
 pLiteralExp (NumberLiteral s) = s
+pLiteralExp (StringLiteral s) = pStringLiteral s
 
-printInnerString :: String -> String
-printInnerString = concatMap escapeChar
+pStringLiteral (DoubleQuotedString s) = "\"" ++ (printInnerString '"' s) ++ "\""
+pStringLiteral (SingleQuotedString s) = "'" ++ (printInnerString '\'' s) ++ "'"
+
+printInnerString :: Char -> String -> String
+printInnerString quoteChar s = concatMap escapeChar s
     where
-        escapeChar '"'  = "\\\""
-        escapeChar '\\' = "\\\\"
-        escapeChar '/'  = "\\/"
-        escapeChar '\b' = "\\b"
-        escapeChar '\f' = "\\f"
-        escapeChar '\n' = "\\n"
-        escapeChar '\r' = "\\r"
-        escapeChar '\t' = "\\t"
-        escapeChar c    = [c]
+        escapeChar c | c == quoteChar = "\\" ++ [quoteChar]
+                     | c == '\\'      = "\\\\"
+                     | c == '/'       = "\\/"
+                     | c == '\b'      = "\\b"
+                     | c == '\f'      = "\\f"
+                     | c == '\n'      = "\\n"
+                     | c == '\r'      = "\\r"
+                     | c == '\t'      = "\\t"
+                     | otherwise      = [c]

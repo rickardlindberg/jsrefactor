@@ -1,7 +1,7 @@
 module JSRefactor.JS.Parser
     (
       parseJSFile
-    , innerstring
+    , innerString
     ) where
 
 import JSRefactor.JS.Types
@@ -85,7 +85,7 @@ literalExp =
     literal ==> LiteralExpression
 
 literal =
-    numberLiteral
+    numberLiteral <|> stringLiteral
 
 numberLiteral = do
     i      <- integer
@@ -112,22 +112,41 @@ exponent_ = do
     d      <- (atLeastOnce digit)
     return $  e ++ p ++ d
 
+stringLiteral =
+    (doubleQuotedString <|> singleQuotedString) ==> StringLiteral
+
+doubleQuotedString = do
+    _      <- (terminal "\"")
+    s      <- (innerString '"')
+    _      <- (terminal "\"")
+    return $  DoubleQuotedString s
+
+singleQuotedString = do
+    _      <- (terminal "'")
+    s      <- (innerString '\'')
+    _      <- (terminal "'")
+    return $  SingleQuotedString s
+
 digit            = oneCharOf "1234567890"
 nonZeroDigit     = oneCharOf "123456789"
 
 name             =  atLeastOnce $ oneCharOf $ ['a'..'z'] ++ ['A'..'Z']
 
-innerstring      =  many (escaped <|> unescaped)
-escaped          =  (terminal "\\") <&> (oneCharOf "\"\\/bfnrt") ==> (\(_, c) -> (unescape c))
-unescape '"'     =  '"'
-unescape '\\'    =  '\\'
-unescape '/'     =  '/'
-unescape 'b'     =  '\b'
-unescape 'f'     =  '\f'
-unescape 'n'     =  '\n'
-unescape 'r'     =  '\r'
-unescape 't'     =  '\t'
-unescaped        =  anyCharBut ['"', '\\', '\b', '\f', '\n', '\r', '\t']
+innerString quoteChar = many (escaped <|> unescaped)
+    where
+        escaped    = do
+            _      <- (terminal "\\")
+            c      <- (oneCharOf $ quoteChar:"\\/bfnrt")
+            return $  unescape c
+        unescape c | c == quoteChar =  quoteChar
+                   | c == '\\'      =  '\\'
+                   | c == '/'       =  '/'
+                   | c == 'b'       =  '\b'
+                   | c == 'f'       =  '\f'
+                   | c == 'n'       =  '\n'
+                   | c == 'r'       =  '\r'
+                   | c == 't'       =  '\t'
+        unescaped  =  anyCharBut [quoteChar, '\\', '\b', '\f', '\n', '\r', '\t']
 
 whitespace       =  many        oneWhitespace
 reqWhitespace    =  atLeastOnce oneWhitespace

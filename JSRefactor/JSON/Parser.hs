@@ -3,7 +3,7 @@ module JSRefactor.JSON.Parser
       parseJSONFile
     ) where
 
-import JSRefactor.JS.Parser (innerstring)
+import JSRefactor.JS.Parser (innerString)
 import JSRefactor.JSON.Types
 import JSRefactor.ParseLib
 
@@ -68,7 +68,7 @@ pair          =  space
              ==> (\((((s1, k), s2), _), v) -> Pair s1 k s2 v)
 
 barestring    =  (terminal "\"")
-             <&> innerstring 
+             <&> (innerString '"')
              <&> (terminal "\"")
              ==> (\((_, s), _) -> s)
 

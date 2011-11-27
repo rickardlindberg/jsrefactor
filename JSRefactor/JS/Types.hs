@@ -8,6 +8,7 @@ module JSRefactor.JS.Types
     , ReturnStatement(..)
     , Expression(..)
     , Literal(..)
+    , StringLiteral(..)
     ) where
 
 data Value =
@@ -60,12 +61,17 @@ data Expression =
     deriving (Eq, Show)
 
 data Literal =
-    NumberLiteral String
-    -- string
+      NumberLiteral String
+    | StringLiteral StringLiteral
     -- object
     -- array
     -- function
     -- regexp
+    deriving (Eq, Show)
+
+data StringLiteral =
+      DoubleQuotedString String
+    | SingleQuotedString String
     deriving (Eq, Show)
 
 type WhiteSpace = String

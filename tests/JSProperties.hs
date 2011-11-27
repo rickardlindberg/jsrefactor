@@ -29,6 +29,7 @@ value size = liftM Value stmts
         expression      = oneof [ liftM  LiteralExpression literal
                                 ]
         literal         = oneof [ liftM  NumberLiteral number
+                                , liftM  StringLiteral string
                                 ]
         number          = integer <++> fraction <++> exponent
         integer         = oneof [ return "0"
@@ -40,6 +41,10 @@ value size = liftM Value stmts
         exponent        = (elements ["e", "E"]) <++> (elements ["", "+", "-"]) <++> (listOf1 digit)
         nonZeroDigit    = elements "123456789"
         digit           = elements "1234567890"
+        string          = oneof [ liftM DoubleQuotedString innerString
+                                , liftM SingleQuotedString innerString
+                                ]
+        innerString     = listOf (elements (['a'..'z'] ++ ['\\', '/', '\b', '\f', '\n', '\r', '\t']))
         whitespace      = listOf  oneWhitespace
         reqWhitespace   = listOf1 oneWhitespace
         oneWhitespace   = elements " \n"
@@ -53,13 +58,11 @@ first <++> second = liftM2 (++) first second
 
 prop_parsed_and_printed_is_same_as_original value =
     let originalString = printValue value in
-        whenFail (putStr ("\nString: " ++ originalString ++ "Back: " ++ (show (parseJSFile originalString)))) $
         case parseJSFile originalString of
             Left  _      -> False
             Right value' -> (printValue value') == originalString
 
 prop_printed_and_parsed_is_same_as_original value =
-    whenFail (putStr ((printValue value) ++ (show (parseJSFile (printValue value))))) $
     case parseJSFile (printValue value) of
         Left  _      -> False
         Right value' -> value' == value

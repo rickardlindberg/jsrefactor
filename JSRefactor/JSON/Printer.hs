@@ -41,4 +41,4 @@ printPair (Pair s1 k s2 v) =
     s1 ++ (printString k) ++ s2 ++ ":" ++ (printValue v)
 
 printString v =
-    "\"" ++ (printInnerString v) ++ "\""
+    "\"" ++ (printInnerString '"' v) ++ "\""
