@@ -8,21 +8,22 @@ import JSRefactor.JS.Types
 import Data.List (intercalate)
 
 printValue :: Value -> String
+printValue (Value s) = pStmts s
 
-printValue (Value statements whitespace) =
-    (intercalate "" (map pStmt statements)) ++ whitespace
+pStmts (Statement s1 s ss) = s1 ++ (pStmt s) ++ (pStmts ss)
+pStmts (EndStatement s)    = s
 
-pStmt (DisruptiveStatement s disruptive) = s ++ (pDisruptiveStmt disruptive)
+pStmt (DisruptiveStatement disruptive) = pDisruptiveStmt disruptive
 
-pDisruptiveStmt (BreakStatement b)   = pBreakStmt b
-pDisruptiveStmt (ReturnStatement r)  = pReturnStmt r
-pDisruptiveStmt (ThrowStatement s e) = "throw" ++ s ++ (printExpression e) ++ ";"
+pDisruptiveStmt (BreakStatement b)       = pBreakStmt b
+pDisruptiveStmt (ReturnStatement r)      = pReturnStmt r
+pDisruptiveStmt (ThrowStatement s1 e s2) = "throw" ++ s1 ++ (printExpression e) ++ s2 ++ ";"
 
 pBreakStmt (LabeledBreadStatement s1 label s2) = "break" ++ s1 ++ label ++ s2 ++ ";"
 pBreakStmt (EmptyBreakStatement s)             = "break" ++ s ++ ";"
 
-pReturnStmt (ExpressionReturnStatement s e) = "return" ++ s ++ (printExpression e) ++ ";"
-pReturnStmt (EmptyReturnStatement s)        = "return" ++ s ++ ";"
+pReturnStmt (ExpressionReturnStatement s1 e s2) = "return" ++ s1 ++ (printExpression e) ++ s2 ++ ";"
+pReturnStmt (EmptyReturnStatement s)            = "return" ++ s ++ ";"
 
 printExpression s = s
 

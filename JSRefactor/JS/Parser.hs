@@ -13,17 +13,28 @@ parseJSFile input =
         Left  errorMessage -> Left  errorMessage
         Right (value, _)   -> Right value
 
-jsFile           =  many statement
-                <&> whitespace
-                <&> eof
-                ==> (\((vs, s), _) -> Value vs s)
+jsFile = do
+    ss     <- statements
+    _      <- eof
+    return $  Value ss
 
-statement        =  disruptiveStmt
+statements =
+    singleStatement <|> nilStmt
 
-disruptiveStmt = do
+singleStatement = do
     s      <- whitespace
-    d      <- (breakStmt <|> returnStmt <|> throwStmt)
-    return $  DisruptiveStatement s d
+    v      <- statement
+    vs     <- statements
+    return $  Statement s v vs
+
+nilStmt =
+    whitespace ==> EndStatement
+
+statement =
+    disruptiveStmt
+
+disruptiveStmt =
+    (breakStmt <|> returnStmt <|> throwStmt) ==> DisruptiveStatement
 
 breakStmt =
     (labeledBreakStmt <|> emptyBreakStmt) ==> BreakStatement
@@ -47,10 +58,11 @@ returnStmt =
 
 exprReturnStmt = do
     _      <- terminal "return"
-    s      <- reqWhitespace
+    s1     <- reqWhitespace
     e      <- expression
+    s2     <- whitespace
     _      <- terminal ";"
-    return $  ExpressionReturnStatement s e
+    return $  ExpressionReturnStatement s1 e s2
 
 emptyReturnStmt = do
     _      <- terminal "return"
@@ -58,11 +70,13 @@ emptyReturnStmt = do
     _      <- terminal ";"
     return $  EmptyReturnStatement s
 
-throwStmt        =  terminal "throw"
-                <&> reqWhitespace
-                <&> expression
-                <&> terminal ";"
-                ==> (\(((_, s), e), _) -> ThrowStatement s e)
+throwStmt = do
+    _      <- terminal "throw"
+    s1     <- reqWhitespace
+    e      <- expression
+    s2     <- whitespace
+    _      <- terminal ";"
+    return $  ThrowStatement s1 e s2
 
 expression       =  atLeastOnce $ oneCharOf "1"
 

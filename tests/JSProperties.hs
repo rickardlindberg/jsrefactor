@@ -9,25 +9,27 @@ import Test.QuickCheck
 instance Arbitrary Value where
     arbitrary = sized value
 
-value size = liftM2 Value statements whitespace
+value size = liftM Value stmts
     where
-        statements      = listOf statement
-        statement       = oneof [ liftM2 DisruptiveStatement whitespace dStatement
+        stmts           = oneof [ liftM3 Statement    whitespace stmt stmts
+                                , liftM  EndStatement whitespace
                                 ]
-        dStatement      = oneof [ liftM  BreakStatement  breakStmt
+        stmt            = oneof [ liftM  DisruptiveStatement disruptiveStmt
+                                ]
+        disruptiveStmt  = oneof [ liftM  BreakStatement  breakStmt
                                 , liftM  ReturnStatement returnStmt
-                                , liftM2 ThrowStatement  reqWhitespace expression
+                                , liftM3 ThrowStatement  reqWhitespace expression whitespace
                                 ]
         breakStmt       = oneof [ liftM3 LabeledBreadStatement reqWhitespace label whitespace
                                 , liftM  EmptyBreakStatement   whitespace
                                 ]
-        returnStmt      = oneof [ liftM2 ExpressionReturnStatement reqWhitespace expression
+        returnStmt      = oneof [ liftM3 ExpressionReturnStatement reqWhitespace expression whitespace
                                 , liftM  EmptyReturnStatement      whitespace
                                 ]
+        expression      = return "1"
         whitespace      = listOf  oneWhitespace
         reqWhitespace   = listOf1 oneWhitespace
         oneWhitespace   = elements " \n"
-        expression      = return "1"
         label           = return "abc"
         newSize         = size `div` 2
 

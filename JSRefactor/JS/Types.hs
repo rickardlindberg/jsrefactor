@@ -1,6 +1,7 @@
 module JSRefactor.JS.Types
     (
       Value(..)
+    , Statements(..)
     , Statement(..)
     , DisruptiveStatement(..)
     , BreakStatement(..)
@@ -8,12 +9,17 @@ module JSRefactor.JS.Types
     ) where
 
 data Value =
-    Value [Statement] WhiteSpace
+    Value Statements
+    deriving (Eq, Show)
+
+data Statements =
+      Statement    WhiteSpace Statement Statements
+    | EndStatement WhiteSpace
     deriving (Eq, Show)
 
 data Statement =
     -- expression statement
-    DisruptiveStatement WhiteSpace DisruptiveStatement
+    DisruptiveStatement DisruptiveStatement
     -- try statement
     -- if statement
     -- (labeled) switch statement
@@ -25,7 +31,7 @@ data Statement =
 data DisruptiveStatement =
       BreakStatement       BreakStatement
     | ReturnStatement      ReturnStatement
-    | ThrowStatement       WhiteSpace Expression
+    | ThrowStatement       WhiteSpace Expression WhiteSpace
     deriving (Eq, Show)
 
 data BreakStatement =
@@ -34,7 +40,7 @@ data BreakStatement =
     deriving (Eq, Show)
 
 data ReturnStatement =
-      ExpressionReturnStatement WhiteSpace Expression
+      ExpressionReturnStatement WhiteSpace Expression WhiteSpace
     | EmptyReturnStatement      WhiteSpace
     deriving (Eq, Show)
 
