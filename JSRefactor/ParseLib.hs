@@ -2,11 +2,11 @@ module JSRefactor.ParseLib
     (
       runParser
     , initialParseState
+    , constant
     , terminal
     , oneCharOf
     , anyCharBut
     , eof
-    , optional
     , (<|>)
     , (<&>)
     , (==>)
@@ -26,6 +26,9 @@ data ParseState = ParseState {
 }
 
 initialParseState input = ParseState input
+
+constant :: a -> Parser a
+constant value = Parser $ \parseState -> Right (value, parseState)
 
 terminal :: String -> Parser String
 terminal string = Parser $ \(ParseState input) ->
@@ -53,12 +56,6 @@ eof = Parser $ \state ->
           case state of
              (ParseState "") -> Right ("", (ParseState ""))
              _               -> Left  "Expected EOF"
-
-optional :: a -> Parser a -> Parser a
-optional defaultValue (Parser p) = Parser $ \state ->
-    case p state of
-        Left _                    -> Right (defaultValue, state)
-        Right (product, newState) -> Right (product, newState)
 
 (<|>) :: Parser a -> Parser a -> Parser a
 (Parser first) <|> (Parser second) = Parser $ \state ->
@@ -113,7 +110,7 @@ many parser = Parser $ \state ->
                 Right (vs, nextState) -> Right (v:vs, nextState)
 
 instance Monad Parser where
-    return value = Parser $ \parseState -> Right (value, parseState)
+    return = constant
     first >>= f  = Parser $ \state ->
         case runParser first state of
             Left msg                  -> Left msg

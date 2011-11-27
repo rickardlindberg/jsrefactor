@@ -31,7 +31,7 @@ string        =  space
 
 number = do
     s1        <- space
-    sign      <- (optional "" $ terminal "-")
+    sign      <- (terminal "-" <|> constant "")
     v         <- (atLeastOnce $ oneCharOf "1234567890")
     s2        <- space
     return    $  Number s1 (sign ++ v) s2
