@@ -30,13 +30,14 @@ value size = liftM Value stmts
                                 ]
         literal         = oneof [ liftM  NumberLiteral number
                                 ]
-        number          = liftM2 (++) integer fraction
+        number          = integer <++> fraction <++> exponent
         integer         = oneof [ return "0"
                                 , liftM2 (:) nonZeroDigit (listOf digit)
                                 ]
         fraction        = oneof [ return ""
                                 , liftM2 (++) (return ".") (listOf digit)
                                 ]
+        exponent        = (elements ["e", "E"]) <++> (elements ["", "+", "-"]) <++> (listOf1 digit)
         nonZeroDigit    = elements "123456789"
         digit           = elements "1234567890"
         whitespace      = listOf  oneWhitespace
@@ -44,6 +45,9 @@ value size = liftM Value stmts
         oneWhitespace   = elements " \n"
         label           = return "abc"
         newSize         = size `div` 2
+
+(<++>) :: Gen String -> Gen String -> Gen String
+first <++> second = liftM2 (++) first second
 
 -- Properties
 

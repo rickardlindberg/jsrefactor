@@ -90,7 +90,8 @@ literal =
 numberLiteral = do
     i      <- integer
     f      <- (fraction <|> constant "")
-    return $  NumberLiteral (i ++ f)
+    e      <- (exponent_ <|> constant "")
+    return $  NumberLiteral (i ++ f ++ e)
 
 integer =
     (terminal "0") <|> nonZeroInteger
@@ -104,6 +105,12 @@ fraction = do
     dot    <- (terminal ".")
     digits <- (many digit)
     return $  dot ++ digits
+
+exponent_ = do
+    e      <- (terminal "e" <|> terminal "E")
+    p      <- (terminal "+" <|> terminal "-" <|> terminal "")
+    d      <- (atLeastOnce digit)
+    return $  e ++ p ++ d
 
 digit            = oneCharOf "1234567890"
 nonZeroDigit     = oneCharOf "123456789"
