@@ -27,7 +27,7 @@ value size =
                    ]
     where
         whitespace       = listOf (elements " \n")
-        string           = listOf (elements (['a'..'z'] ++ ['"', '\\', '/', '\b', '\f', '\n', '\r', '\t']))
+        string           = listOf (elements (['"', '\'', '\\', '/', '\b', '\f', '\n', '\r', '\t'] ++ [' '..'ω']))
         number           = liftM2 (++) sign base
         base             = listOf1 (elements "0123456789")
         sign             = oneof [return "", return "-"]

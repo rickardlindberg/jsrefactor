@@ -44,7 +44,7 @@ value size = liftM Value stmts
         string          = oneof [ liftM DoubleQuotedString innerString
                                 , liftM SingleQuotedString innerString
                                 ]
-        innerString     = listOf (elements (['a'..'z'] ++ ['\\', '/', '\b', '\f', '\n', '\r', '\t']))
+        innerString     = listOf (elements (['"', '\'', '\\', '/', '\b', '\f', '\n', '\r', '\t'] ++ [' '..'ω']))
         whitespace      = listOf  oneWhitespace
         reqWhitespace   = listOf1 oneWhitespace
         oneWhitespace   = elements " \n"
