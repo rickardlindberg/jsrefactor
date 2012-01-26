@@ -9,6 +9,7 @@ module JSRefactor.JS.Types
     , Expression(..)
     , Literal(..)
     , StringLiteral(..)
+    , WhiteSpace
     ) where
 
 data Value =
